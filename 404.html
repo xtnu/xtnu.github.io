@@ -1,9 +1,235 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - 页面走丢了</title>
+    <link rel="icon" href="./static/img/favicon.ico">
+    <style>
+        @font-face {
+            font-family: "Ubuntu";
+            src: url("./static/fonts/Ubuntu-Regular.ttf");
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Pacifico";
+            src: url("./static/fonts/Pacifico-Regular.ttf");
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #fef0f5 0%, #ffeaf3 50%, #fff5f9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cat-paw-decorations {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .cat-paw {
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .cat-paw:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .cat-paw:nth-child(2) { top: 30%; right: 8%; animation-delay: 1s; }
+        .cat-paw:nth-child(3) { top: 60%; left: 10%; animation-delay: 2s; }
+        .cat-paw:nth-child(4) { top: 80%; right: 12%; animation-delay: 3s; }
+        .cat-paw:nth-child(5) { top: 45%; left: 3%; animation-delay: 4s; }
+        .cat-paw:nth-child(6) { top: 20%; right: 5%; animation-delay: 5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+            padding: 40px 20px;
+        }
+
+        .error-404 {
+            font-size: 180px;
+            font-weight: 800;
+            color: #ff6b9d;
+            font-family: "Pacifico", cursive;
+            text-shadow: 4px 4px 0 #ffd7e6, 8px 8px 20px rgba(255, 107, 157, 0.2);
+            animation: bounce 2s ease-in-out infinite;
+            line-height: 1;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .cat-face {
+            font-size: 120px;
+            margin: 20px 0;
+            animation: wiggle 1.5s ease-in-out infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .message {
+            font-size: 28px;
+            color: #4a2c40;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .sub-message {
+            font-size: 18px;
+            color: #8b6b7d;
+            margin-bottom: 40px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #ff6b9d, #ff8fb3);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(255, 107, 157, 0.4);
+        }
+
+        .paw-trail {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .paw {
+            font-size: 32px;
+            opacity: 0;
+            animation: pawAppear 2s ease-in-out infinite;
+        }
+
+        .paw:nth-child(1) { animation-delay: 0s; }
+        .paw:nth-child(2) { animation-delay: 0.3s; }
+        .paw:nth-child(3) { animation-delay: 0.6s; }
+        .paw:nth-child(4) { animation-delay: 0.9s; }
+        .paw:nth-child(5) { animation-delay: 1.2s; }
+
+        @keyframes pawAppear {
+            0%, 100% { opacity: 0; transform: translateY(20px); }
+            50% { opacity: 0.6; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .error-404 {
+                font-size: 120px;
+            }
+
+            .cat-face {
+                font-size: 80px;
+            }
+
+            .message {
+                font-size: 22px;
+            }
+
+            .sub-message {
+                font-size: 16px;
+            }
+
+            .back-btn {
+                padding: 14px 32px;
+                font-size: 16px;
+            }
+
+            .cat-paw {
+                font-size: 40px;
+            }
+
+            .cat-paw:nth-child(n+4) {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="cat-paw-decorations">
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+    </div>
+
+    <div class="container">
+        <div class="error-404">404</div>
+        <div class="cat-face">😺</div>
+        <div class="message">喵~ 页面走丢了</div>
+        <div class="sub-message">这只小猫咪好像找不到路了...</div>
+        
+        <a href="/" class="back-btn">
+            🏠 返回首页
+        </a>
+
+        <div class="paw-trail">
+            <div class="paw">🐾</div>
+            <div class="paw">🐾</div>
+            <div class="paw">🐾</div>
+            <div class="paw">🐾</div>
+            <div class="paw">🐾</div>
+        </div>
+    </div>
 </body>
 </html>
