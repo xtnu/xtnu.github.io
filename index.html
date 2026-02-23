@@ -7,513 +7,85 @@
     <link rel="icon" href="./static/img/favicon.ico">
     <meta name="description" content="Xtn.....">
     <meta name="keywords" content="xtn,喃娘,nanniang,喃娘主页,夏透喃引导页,NanNiang，XtnAPI,喃娘API,免费API">
-    <style>
-        /* 字体引入 */
-        @font-face {
-            font-family: "Ubuntu";
-            src: url("./static/fonts/Ubuntu-Regular.ttf");
-            font-display: swap;
-        }
-
-        @font-face {
-            font-family: "Pacifico";
-            src: url("./static/fonts/Pacifico-Regular.ttf");
-            font-display: swap;
-        }
-
-        /* 全局样式 */
-        :root {
-            --background-color: #f5f5f7;
-            --text-color: #1d1d1f;
-            --secondary-text-color: #86868b;
-            --accent-color: #0071e3;
-            --card-background: #ffffff;
-            --border-color: #e3e3e3;
-            --header-background: rgba(245, 245, 247, 0.8);
-            --shadow-color: rgba(0, 0, 0, 0.05);
-        }
-
-        [data-theme="dark"] {
-            --background-color: #1d1d1f;
-            --text-color: #f5f5f7;
-            --secondary-text-color: #86868b;
-            --accent-color: #0a84ff;
-            --card-background: #2c2c2e;
-            --border-color: #3a3a3c;
-            --header-background: rgba(29, 29, 31, 0.8);
-            --shadow-color: rgba(0, 0, 0, 0.3);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: "Ubuntu", -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--background-color);
-            background-image: url("./static/img/background.jpg");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: var(--text-color);
-            line-height: 1.6;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* 背景图片覆盖层，确保文字可读性 */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(245, 245, 247, 0.9);
-            z-index: -1;
-            transition: background-color 0.3s ease;
-        }
-
-        [data-theme="dark"] body::before {
-            background-color: rgba(29, 29, 31, 0.9);
-        }
-
-        /* 导航栏 */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--header-background);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .navbar-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 44px;
-        }
-
-        .navbar-logo {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--text-color);
-            text-decoration: none;
-        }
-
-        .navbar-links {
-            display: flex;
-            gap: 30px;
-        }
-
-        .navbar-link {
-            font-size: 12px;
-            color: var(--text-color);
-            text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.2s ease;
-        }
-
-        .navbar-link:hover {
-            opacity: 1;
-        }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            cursor: pointer;
-            font-size: 16px;
-            opacity: 0.8;
-            transition: opacity 0.2s ease;
-        }
-
-        .theme-toggle:hover {
-            opacity: 1;
-        }
-
-        /* 英雄区域 */
-        .hero {
-            padding-top: 100px;
-            padding-bottom: 80px;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .hero-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin-bottom: 30px;
-            object-fit: cover;
-            border: 3px solid var(--card-background);
-            box-shadow: 0 4px 12px var(--shadow-color);
-        }
-
-        .hero-title {
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: -0.01em;
-            font-family: "Pacifico", cursive;
-        }
-
-        .hero-subtitle {
-            font-size: 24px;
-            color: var(--secondary-text-color);
-            margin-bottom: 32px;
-            font-weight: 400;
-        }
-
-        .hero-description {
-            font-size: 16px;
-            color: var(--secondary-text-color);
-            margin-bottom: 40px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .hero-links {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 40px;
-        }
-
-        .hero-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background-color: var(--accent-color);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-
-        .hero-link:hover {
-            background-color: #0077ed;
-            transform: translateY(-2px);
-        }
-
-        .hero-link.secondary {
-            background-color: var(--card-background);
-            color: var(--accent-color);
-            border: 1px solid var(--border-color);
-        }
-
-        .hero-link.secondary:hover {
-            background-color: var(--background-color);
-        }
-
-        /* 标签 */
-        .tags {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 60px;
-        }
-
-        .tag {
-            padding: 6px 16px;
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
-            font-size: 12px;
-            color: var(--secondary-text-color);
-            transition: all 0.2s ease;
-        }
-
-        .tag:hover {
-            background-color: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-        }
-
-        /* 内容区域 */
-        .content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            margin-bottom: 80px;
-        }
-
-        .section {
-            margin-bottom: 80px;
-        }
-
-        .section-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 40px;
-            letter-spacing: -0.01em;
-        }
-
-        /* 项目展示 */
-        .projects {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .project-card {
-            background-color: var(--card-background);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px var(--shadow-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .project-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 24px var(--shadow-color);
-        }
-
-        .project-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .project-content {
-            padding: 24px;
-        }
-
-        .project-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .project-description {
-            font-size: 14px;
-            color: var(--secondary-text-color);
-            margin-bottom: 16px;
-        }
-
-        .project-link {
-            font-size: 14px;
-            color: var(--accent-color);
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-block;
-            transition: transform 0.2s ease;
-        }
-
-        .project-link:hover {
-            transform: translateX(4px);
-        }
-
-        /* 时间线 */
-        .timeline {
-            position: relative;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .timeline::after {
-            content: '';
-            position: absolute;
-            width: 2px;
-            background-color: var(--border-color);
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            margin-left: -1px;
-        }
-
-        .timeline-item {
-            padding: 10px 40px;
-            position: relative;
-            width: 50%;
-            box-sizing: border-box;
-        }
-
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            top: 15px;
-            z-index: 1;
-        }
-
-        .timeline-item.left {
-            left: 0;
-        }
-
-        .timeline-item.right {
-            left: 50%;
-        }
-
-        .timeline-item.left::after {
-            right: -8px;
-        }
-
-        .timeline-item.right::after {
-            left: -8px;
-        }
-
-        .timeline-content {
-            padding: 20px;
-            background-color: var(--card-background);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px var(--shadow-color);
-        }
-
-        .timeline-year {
-            font-size: 12px;
-            color: var(--accent-color);
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .timeline-text {
-            font-size: 14px;
-            color: var(--secondary-text-color);
-        }
-
-        /* 页脚 */
-        .footer {
-            padding: 40px 20px;
-            text-align: center;
-            border-top: 1px solid var(--border-color);
-            background-color: var(--card-background);
-        }
-
-        .footer-text {
-            font-size: 12px;
-            color: var(--secondary-text-color);
-            margin-bottom: 16px;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 16px;
-        }
-
-        .footer-link {
-            font-size: 12px;
-            color: var(--secondary-text-color);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .footer-link:hover {
-            color: var(--accent-color);
-        }
-
-        .footer-copyright {
-            font-size: 12px;
-            color: var(--secondary-text-color);
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .navbar-links {
-                display: none;
-            }
-
-            .hero-title {
-                font-size: 36px;
-            }
-
-            .hero-subtitle {
-                font-size: 20px;
-            }
-
-            .hero-links {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .hero-link {
-                width: 200px;
-                justify-content: center;
-            }
-
-            .timeline::after {
-                left: 31px;
-            }
-
-            .timeline-item {
-                width: 100%;
-                padding-left: 70px;
-                padding-right: 25px;
-            }
-
-            .timeline-item.right {
-                left: 0;
-            }
-
-            .timeline-item.left::after,
-            .timeline-item.right::after {
-                left: 23px;
-            }
-
-            .projects {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* 动画 */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease forwards;
-            opacity: 0;
-        }
-
-        .delay-1 {
-            animation-delay: 0.1s;
-        }
-
-        .delay-2 {
-            animation-delay: 0.2s;
-        }
-
-        .delay-3 {
-            animation-delay: 0.3s;
-        }
-
-        .delay-4 {
-            animation-delay: 0.4s;
-        }
-
-        .delay-5 {
-            animation-delay: 0.5s;
-        }
-    </style>
+    <link rel="stylesheet" href="./static/css/style.css">
 </head>
 <body>
-    <!-- 导航栏 -->
+    <div class="cat-paw-decorations">
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+        <div class="cat-paw">🐾</div>
+    </div>
+
+    <button class="settings-btn" id="settingsBtn">
+        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M509.387755 666.122449c-83.591837 0-151.510204-67.918367-151.510204-151.510204s67.918367-151.510204 151.510204-151.510204 151.510204 67.918367 151.510204 151.510204-67.918367 151.510204-151.510204 151.510204z m0-261.22449c-60.604082 0-109.714286 49.110204-109.714286 109.714286s49.110204 109.714286 109.714286 109.714286 109.714286-49.110204 109.714286-109.714286-49.110204-109.714286-109.714286-109.714286z" fill="currentColor"></path><path d="M556.408163 929.959184h-83.591836c-47.542857 0-86.204082-38.661224-86.204082-86.204082v-22.987755c0-1.044898-0.522449-2.089796-1.567347-2.612245h-0.522449c-1.044898-0.522449-2.089796 0-3.134694 0.522449l-14.628571 15.15102c-16.195918 16.195918-37.093878 25.077551-59.559184 25.077551-22.465306 0-43.363265-8.881633-59.036735-24.555102l-59.036734-59.036734c-32.391837-32.391837-32.391837-85.159184 0-118.07347l15.673469-15.15102c1.044898-1.044898 1.044898-2.089796 0.522449-3.134694v-0.522449c-0.522449-1.044898-1.567347-1.567347-2.612245-1.567347h-22.987755c-47.542857 0-86.204082-38.661224-86.204082-86.204082v-78.367346c0.522449-47.020408 39.183673-85.681633 86.726531-85.681633h21.420408c1.044898 0 2.089796-0.522449 2.612245-2.089796 0.522449-1.044898 1.044898-2.612245 1.567347-3.657143 0.522449-1.044898 0-2.089796-0.522449-3.134694l-16.195918-16.718367C156.734694 329.142857 156.734694 275.853061 189.126531 243.461224l59.036734-59.036734c15.673469-15.673469 36.571429-24.555102 59.036735-24.555102 22.465306 0 43.363265 8.881633 59.036735 24.555102l15.15102 15.673469c0.522449 1.044898 2.089796 1.044898 3.134694 0.522449h0.522449c1.044898-0.522449 1.567347-1.567347 1.567347-2.612245v-17.763265C386.612245 132.702041 425.273469 94.040816 472.816327 94.040816h83.591836c44.408163 0 80.979592 36.571429 80.979592 80.979592v21.420408c0 1.044898 0.522449 2.089796 2.089796 2.612245 1.567347 0.522449 2.612245 1.044898 3.657143 1.567347 1.044898 0.522449 2.089796 0 3.134694-0.522449l16.718367-16.195918c32.391837-32.391837 85.159184-32.391837 118.073469 0.522449l59.036735 59.036734c15.673469 15.673469 24.555102 36.571429 24.555102 59.036735 0 22.465306-8.881633 43.363265-24.555102 59.036735l-15.673469 16.195918c-0.522449 0.522449-1.044898 2.089796-0.522449 2.612245 0.522449 1.044898 1.044898 2.612245 1.567347 3.657143 0.522449 1.044898 1.567347 2.089796 2.612245 2.089796h21.420408c44.408163 0 80.979592 36.571429 80.979592 80.979592v88.816326c0 44.408163-36.571429 80.979592-80.979592 80.979592h-22.987755c-1.044898 0-2.089796 0.522449-2.612245 1.567347-0.522449 1.567347-0.522449 2.612245 0.522449 3.657143l15.15102 14.628571c16.195918 16.195918 25.077551 37.093878 24.555102 59.559184 0 22.465306-8.881633 43.363265-24.555102 59.036735l-59.036734 59.036734c-15.673469 15.673469-36.571429 24.555102-59.036735 24.555102s-43.363265-8.881633-59.036735-24.555102l-16.195918-15.673469c-0.522449-0.522449-2.089796-1.044898-2.612245-0.522449-1.044898 0.522449-2.612245 1.044898-3.657143 1.567347-1.044898 0.522449-2.089796 1.567347-2.089796 2.612245v26.644898C637.387755 893.387755 600.816327 929.959184 556.408163 929.959184zM402.285714 780.538776c16.195918 7.314286 26.122449 22.987755 26.122449 40.75102v22.987755c0 24.555102 19.853061 44.408163 44.408164 44.408163h83.591836c21.420408 0 39.183673-17.763265 39.183674-39.183673v-26.644898c0-18.285714 10.971429-34.481633 28.212245-41.27347 1.044898-0.522449 1.567347-0.522449 2.612245-1.044897 16.718367-7.314286 35.526531-3.657143 48.587755 8.881632l16.195918 15.67347c16.718367 16.718367 43.363265 16.718367 59.559184 0l59.036734-59.036735c7.836735-7.836735 12.016327-18.285714 12.016327-29.779592 0-10.971429-4.179592-21.420408-12.016327-29.779592l-14.628571-14.106122c-13.583673-13.061224-17.763265-32.914286-9.926531-50.155102v-0.522449c6.791837-15.673469 22.987755-26.122449 40.751021-26.122449h22.987755c21.420408 0 39.183673-17.763265 39.183673-39.183674v-88.816326c0-21.420408-17.763265-39.183673-39.183673-39.183674h-21.420408c-18.285714 0-34.481633-10.971429-41.27347-28.212245-0.522449-1.044898-0.522449-1.567347-1.044898-2.612245-7.314286-16.718367-3.657143-35.526531 8.881633-48.587755l15.673469-16.195918c7.836735-7.836735 12.538776-18.808163 12.538776-29.779592 0-11.493878-4.179592-21.942857-12.016327-29.779592L751.281633 214.204082c-16.195918-16.195918-42.840816-16.195918-59.036735 0l-17.240816 16.195918c-13.061224 12.538776-32.391837 15.673469-48.587755 8.881633-0.522449-0.522449-1.567347-0.522449-2.612245-1.044898-17.240816-6.791837-28.212245-22.987755-28.212245-41.27347v-21.420408c0-21.420408-17.763265-39.183673-39.183674-39.183673h-83.591836c-24.555102 0-44.408163 19.853061-44.408164 44.408163V198.530612c0 17.763265-10.44898 33.436735-26.644898 40.751021-17.240816 7.836735-37.093878 3.657143-50.155102-9.404082l-15.15102-15.673469c-7.836735-7.836735-18.285714-12.016327-29.257143-12.016327-10.971429 0-21.420408 4.179592-29.257143 12.016327L218.906122 272.718367c-16.195918 16.195918-16.195918 42.840816 0 59.036735l16.195919 17.240816c12.538776 13.061224 16.195918 32.391837 8.881632 48.587755-0.522449 0.522449-0.522449 1.567347-1.044897 2.612245-6.791837 17.240816-22.987755 28.212245-41.27347 28.212245h-21.420408c-24.555102 0-44.408163 19.853061-44.408163 44.408164v78.367346c0 24.555102 19.853061 44.408163 44.408163 44.408164h22.987755c17.763265 0 33.436735 10.44898 40.75102 26.644898v0.522449c7.314286 16.718367 3.657143 37.093878-9.404081 49.632653l-15.67347 15.15102c-16.195918 16.195918-16.195918 42.318367 0 58.514286l59.036735 59.036735c7.836735 7.836735 18.285714 12.016327 29.257143 12.016326 10.971429 0 21.420408-4.179592 29.779592-12.538775l14.106122-14.628572c13.061224-13.583673 32.914286-17.763265 50.155102-9.92653l1.044898 0.522449z" fill="currentColor"></path></svg>
+    </button>
+
+    <div class="settings-overlay" id="settingsOverlay"></div>
+
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <div class="settings-title">🐾 主题设置</div>
+            <button class="settings-close" id="settingsClose">
+                <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M175.991861 276.41489l598.673018 550.929757a49.755746 49.755746 0 0 0 70.490266-3.077919c18.615491-20.391214 17.242266-52.070104-3.066081-70.762543L243.416046 202.574428a49.755746 49.755746 0 0 0-70.490266 3.077919c-18.615491 20.391214-17.242266 52.070104 3.066081 70.762543z" fill="currentColor"></path><path d="M270.495815 848.008139l550.929757-598.673018a49.755746 49.755746 0 0 0-3.077919-70.490266c-20.391214-18.615491-52.070104-17.242266-70.762543 3.066081L196.655353 780.583954a49.755746 49.755746 0 0 0 3.077919 70.490266c20.391214 18.615491 52.070104 17.242266 70.762543-3.066081z" fill="currentColor"></path></svg>
+            </button>
+        </div>
+        <div class="settings-content">
+            <div class="settings-section">
+                <div class="settings-section-title">配色方案</div>
+                <div class="color-options">
+                    <div class="color-option pink active" data-theme="pink"></div>
+                    <div class="color-option mint" data-theme="mint"></div>
+                    <div class="color-option yellow" data-theme="yellow"></div>
+                    <div class="color-option purple" data-theme="purple"></div>
+                    <div class="color-option blue" data-theme="blue"></div>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">显示模式</div>
+                <div class="mode-options">
+                    <div class="mode-option" data-mode="light">
+                        <div class="mode-label">日间模式</div>
+                        <div class="mode-toggle"></div>
+                    </div>
+                    <div class="mode-option" data-mode="dark">
+                        <div class="mode-label">夜间模式</div>
+                        <div class="mode-toggle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">壁纸设置</div>
+                <div class="wallpaper-options">
+                    <button class="wallpaper-btn" id="randomWallpaperBtn">
+                       
+                        <span class="wallpaper-loading"></span>
+                        <span>随机壁纸</span>
+                    </button>
+                    <button class="wallpaper-btn reset" id="resetWallpaperBtn">
+                        
+                        <span>重置壁纸</span>
+                    </button>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">背景透明度</div>
+                <div class="opacity-section">
+                    <div class="opacity-label">
+                        <span>遮罩透明度</span>
+                        <span class="opacity-value" id="opacityValue">70%</span>
+                    </div>
+                    <input type="range" class="opacity-slider" id="opacitySlider" min="0" max="100" value="70">
+                </div>
+            </div>
+            <button class="reset-all-btn" id="resetAllBtn">
+                重置所有设置
+            </button>
+        </div>
+    </div>
+
     <nav class="navbar">
         <div class="navbar-container">
             <a href="#" class="navbar-logo">Xtn</a>
@@ -522,17 +94,13 @@
                 <a href="#projects" class="navbar-link">项目</a>
                 <a href="#timeline" class="navbar-link">时间线</a>
             </div>
-            <button class="theme-toggle" id="themeToggle">🌙</button>
         </div>
     </nav>
 
-    <!-- 英雄区域 -->
     <section class="hero" id="about">
-        <!-- <div style="position: relative; display: inline-block;">
-            <img src="./static/img/logo.png" alt="Xtn" class="hero-avatar fade-in" style="opacity: 0.1;">
-            <img src="./static/img/logokuang.png" alt="Avatar Frame" style="position: absolute; top: -31%; left: -15%; width: 130%; height: 130%; z-index: 1;">
-        </div> -->
-        <img src="./static/img/logo.png" alt="Xtn" class="hero-avatar fade-in">
+        <div class="hero-avatar-container">
+            <img src="./static/img/logo.png" alt="Xtn" class="hero-avatar fade-in">
+        </div>
         <h1 class="hero-title fade-in delay-1">Hello, I'm Xtn</h1>
         <p class="hero-subtitle fade-in delay-2">Full-Stack Entertainment Engineer</p>
         <div class="hero-links fade-in delay-4">
@@ -562,9 +130,7 @@
         </div>
     </section>
 
-    <!-- 内容区域 -->
     <div class="content">
-        <!-- 项目部分 -->
         <section class="section" id="projects">
             <h2 class="section-title fade-in">项目</h2>
             <div class="projects">
@@ -611,7 +177,6 @@
             </div>
         </section>
 
-        <!-- 时间线部分 -->
         <section class="section" id="timeline">
             <h2 class="section-title fade-in">时间线</h2>
             <div class="timeline">
@@ -649,7 +214,6 @@
         </section>
     </div>
 
-    <!-- 页脚 -->
     <footer class="footer">
         <div class="footer-text">Xtn © 2025</div>
         <div class="footer-links">
@@ -663,63 +227,7 @@
         </div>
     </footer>
 
-    <script>
-        // 主题切换功能
-        const themeToggle = document.getElementById('themeToggle');
-        const html = document.documentElement;
-
-        // 检查本地存储中的主题设置
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            html.setAttribute('data-theme', savedTheme);
-            themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-        }
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        });
-
-        // 滚动动画
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animationPlayState = 'running';
-                }
-            });
-        }, observerOptions);
-
-        // 观察所有需要动画的元素
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.animationPlayState = 'paused';
-            observer.observe(el);
-        });
-
-        // 平滑滚动
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-    </script>
+    <script src="./static/js/main.js"></script>
 </body>
 
 </html>
-
-

@@ -1,0 +1,264 @@
+const html = document.documentElement;
+const body = document.body;
+
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const settingsOverlay = document.getElementById('settingsOverlay');
+const settingsClose = document.getElementById('settingsClose');
+const randomWallpaperBtn = document.getElementById('randomWallpaperBtn');
+const resetWallpaperBtn = document.getElementById('resetWallpaperBtn');
+const opacitySlider = document.getElementById('opacitySlider');
+const opacityValue = document.getElementById('opacityValue');
+const resetAllBtn = document.getElementById('resetAllBtn');
+
+const DEFAULT_WALLPAPER = './static/img/background.jpg';
+const WALLPAPER_API = 'https://api.521567.xyz/api/img/bd.php';
+const DEFAULT_OPACITY = 70;
+
+const savedTheme = localStorage.getItem('theme') || 'pink';
+const savedMode = localStorage.getItem('mode') || 'light';
+const savedWallpaper = localStorage.getItem('wallpaper');
+const savedOpacity = localStorage.getItem('opacity');
+
+function applyTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.classList.remove('active');
+        if (option.classList.contains(theme)) {
+            option.classList.add('active');
+        }
+    });
+}
+
+function applyMode(mode) {
+    if (mode === 'dark') {
+        html.setAttribute('data-mode', 'dark');
+    } else {
+        html.removeAttribute('data-mode');
+    }
+    localStorage.setItem('mode', mode);
+    
+    document.querySelectorAll('.mode-option').forEach(option => {
+        option.classList.remove('active');
+        if (option.getAttribute('data-mode') === mode) {
+            option.classList.add('active');
+        }
+    });
+}
+
+function applyWallpaper(wallpaperUrl, skipCache = false) {
+    if (wallpaperUrl) {
+        const timestamp = new Date().getTime();
+        const urlWithCache = wallpaperUrl.includes('?') 
+            ? `${wallpaperUrl}&t=${timestamp}` 
+            : `${wallpaperUrl}?t=${timestamp}`;
+        
+        body.style.backgroundImage = `url("${urlWithCache}")`;
+        
+        if (!skipCache) {
+            localStorage.setItem('wallpaper', wallpaperUrl);
+        }
+    } else {
+        body.style.backgroundImage = `url("${DEFAULT_WALLPAPER}")`;
+        localStorage.removeItem('wallpaper');
+    }
+}
+
+function applyOpacity(opacity) {
+    const opacityDecimal = opacity / 100;
+    const styleElement = document.getElementById('opacity-style');
+    
+    if (styleElement) {
+        styleElement.remove();
+    }
+    
+    const style = document.createElement('style');
+    style.id = 'opacity-style';
+    style.textContent = `
+        body::before {
+            opacity: ${opacityDecimal} !important;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    localStorage.setItem('opacity', opacity);
+    
+    if (opacityValue) {
+        opacityValue.textContent = `${opacity}%`;
+    }
+}
+
+applyTheme(savedTheme);
+applyMode(savedMode);
+
+if (savedWallpaper) {
+    applyWallpaper(savedWallpaper, true);
+}
+
+if (savedOpacity) {
+    applyOpacity(parseInt(savedOpacity));
+    if (opacitySlider) {
+        opacitySlider.value = savedOpacity;
+    }
+    if (opacityValue) {
+        opacityValue.textContent = `${savedOpacity}%`;
+    }
+} else {
+    applyOpacity(DEFAULT_OPACITY);
+}
+
+function openSettings() {
+    settingsPanel.classList.add('open');
+    settingsOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSettings() {
+    settingsPanel.classList.remove('open');
+    settingsOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+if (settingsBtn) {
+    settingsBtn.addEventListener('click', openSettings);
+}
+
+if (settingsClose) {
+    settingsClose.addEventListener('click', closeSettings);
+}
+
+if (settingsOverlay) {
+    settingsOverlay.addEventListener('click', closeSettings);
+}
+
+document.querySelectorAll('.color-option').forEach(option => {
+    option.addEventListener('click', () => {
+        const theme = option.getAttribute('data-theme');
+        applyTheme(theme);
+    });
+});
+
+document.querySelectorAll('.mode-option').forEach(option => {
+    option.addEventListener('click', () => {
+        const mode = option.getAttribute('data-mode');
+        applyMode(mode);
+    });
+});
+
+if (randomWallpaperBtn) {
+    randomWallpaperBtn.addEventListener('click', async () => {
+        randomWallpaperBtn.classList.add('loading');
+        
+        try {
+            const timestamp = new Date().getTime();
+            const apiUrl = `${WALLPAPER_API}?t=${timestamp}`;
+            
+            const response = await fetch(apiUrl, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+            
+            const contentType = response.headers.get('content-type');
+            
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                if (data.url) {
+                    applyWallpaper(data.url);
+                } else {
+                    applyWallpaper(apiUrl);
+                }
+            } else {
+                applyWallpaper(apiUrl);
+            }
+        } catch (error) {
+            const timestamp = new Date().getTime();
+            const apiUrl = `${WALLPAPER_API}?t=${timestamp}`;
+            applyWallpaper(apiUrl);
+        }
+        
+        randomWallpaperBtn.classList.remove('loading');
+    });
+}
+
+if (resetWallpaperBtn) {
+    resetWallpaperBtn.addEventListener('click', () => {
+        applyWallpaper(null);
+    });
+}
+
+if (opacitySlider && opacityValue) {
+    opacitySlider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        opacityValue.textContent = `${value}%`;
+        applyOpacity(value);
+    });
+}
+
+if (resetAllBtn) {
+    resetAllBtn.addEventListener('click', () => {
+        if (confirm('确定要重置所有设置为默认值吗？')) {
+            localStorage.clear();
+            
+            applyTheme('pink');
+            applyMode('light');
+            applyWallpaper(null);
+            applyOpacity(DEFAULT_OPACITY);
+            
+            if (opacitySlider) {
+                opacitySlider.value = DEFAULT_OPACITY;
+            }
+            if (opacityValue) {
+                opacityValue.textContent = `${DEFAULT_OPACITY}%`;
+            }
+            
+            const styleElement = document.getElementById('opacity-style');
+            if (styleElement) {
+                styleElement.remove();
+            }
+            
+            location.reload();
+        }
+    });
+}
+
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.animationPlayState = 'running';
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.fade-in').forEach(el => {
+    el.style.animationPlayState = 'paused';
+    observer.observe(el);
+});
+
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && settingsPanel.classList.contains('open')) {
+        closeSettings();
+    }
+});
