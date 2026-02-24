@@ -219,9 +219,18 @@
         <div class="message">喵~ 页面走丢了</div>
         <div class="sub-message">这只小猫咪好像找不到路了...</div>
         
-        <a href="/" class="back-btn">
+        <a href="/" class="back-btn" onclick="playClickSound()">
             🏠 返回首页
         </a>
+        
+        <script>
+            const clickSound = new Audio('./static/soundeffects/click.mp3');
+            
+            function playClickSound() {
+                clickSound.currentTime = 0;
+                clickSound.play().catch(e => console.log('Audio playback prevented:', e));
+            }
+        </script>
 
         <div class="paw-trail">
             <div class="paw">🐾</div>

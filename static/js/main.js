@@ -1,6 +1,13 @@
 const html = document.documentElement;
 const body = document.body;
 
+const clickSound = new Audio('./static/soundeffects/click.mp3');
+
+function playClickSound() {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(e => console.log('Audio playback prevented:', e));
+}
+
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsPanel = document.getElementById('settingsPanel');
 const settingsOverlay = document.getElementById('settingsOverlay');
@@ -10,6 +17,7 @@ const resetWallpaperBtn = document.getElementById('resetWallpaperBtn');
 const opacitySlider = document.getElementById('opacitySlider');
 const opacityValue = document.getElementById('opacityValue');
 const resetAllBtn = document.getElementById('resetAllBtn');
+const contextMenu = document.getElementById('contextMenu');
 
 const DEFAULT_WALLPAPER = './static/img/background.jpg';
 const WALLPAPER_API = 'https://api.521567.xyz/api/img/bd.php';
@@ -122,19 +130,29 @@ function closeSettings() {
 }
 
 if (settingsBtn) {
-    settingsBtn.addEventListener('click', openSettings);
+    settingsBtn.addEventListener('click', (e) => {
+        playClickSound();
+        openSettings();
+    });
 }
 
 if (settingsClose) {
-    settingsClose.addEventListener('click', closeSettings);
+    settingsClose.addEventListener('click', (e) => {
+        playClickSound();
+        closeSettings();
+    });
 }
 
 if (settingsOverlay) {
-    settingsOverlay.addEventListener('click', closeSettings);
+    settingsOverlay.addEventListener('click', (e) => {
+        playClickSound();
+        closeSettings();
+    });
 }
 
 document.querySelectorAll('.color-option').forEach(option => {
     option.addEventListener('click', () => {
+        playClickSound();
         const theme = option.getAttribute('data-theme');
         applyTheme(theme);
     });
@@ -142,6 +160,7 @@ document.querySelectorAll('.color-option').forEach(option => {
 
 document.querySelectorAll('.mode-option').forEach(option => {
     option.addEventListener('click', () => {
+        playClickSound();
         const mode = option.getAttribute('data-mode');
         applyMode(mode);
     });
@@ -149,6 +168,7 @@ document.querySelectorAll('.mode-option').forEach(option => {
 
 if (randomWallpaperBtn) {
     randomWallpaperBtn.addEventListener('click', async () => {
+        playClickSound();
         randomWallpaperBtn.classList.add('loading');
         
         try {
@@ -187,12 +207,14 @@ if (randomWallpaperBtn) {
 
 if (resetWallpaperBtn) {
     resetWallpaperBtn.addEventListener('click', () => {
+        playClickSound();
         applyWallpaper(null);
     });
 }
 
 if (opacitySlider && opacityValue) {
     opacitySlider.addEventListener('input', (e) => {
+        playClickSound();
         const value = parseInt(e.target.value);
         opacityValue.textContent = `${value}%`;
         applyOpacity(value);
@@ -201,6 +223,7 @@ if (opacitySlider && opacityValue) {
 
 if (resetAllBtn) {
     resetAllBtn.addEventListener('click', () => {
+        playClickSound();
         if (confirm('确定要重置所有设置为默认值吗？')) {
             localStorage.clear();
             
@@ -246,6 +269,7 @@ document.querySelectorAll('.fade-in').forEach(el => {
 
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
+        playClickSound();
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
@@ -257,8 +281,87 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+document.querySelectorAll('a[href]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        if (!this.getAttribute('href').startsWith('#')) {
+            playClickSound();
+        }
+    });
+});
+
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && settingsPanel.classList.contains('open')) {
         closeSettings();
     }
+    if (e.key === 'Escape' && contextMenu && contextMenu.classList.contains('open')) {
+        contextMenu.classList.remove('open');
+    }
 });
+
+if (contextMenu) {
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        
+        const x = e.clientX;
+        const y = e.clientY;
+        const menuWidth = contextMenu.offsetWidth;
+        const menuHeight = contextMenu.offsetHeight;
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        
+        let menuX = x;
+        let menuY = y;
+        
+        if (x + menuWidth > screenWidth) {
+            menuX = screenWidth - menuWidth - 10;
+        }
+        
+        if (y + menuHeight > screenHeight) {
+            menuY = screenHeight - menuHeight - 10;
+        }
+        
+        if (menuX < 10) {
+            menuX = 10;
+        }
+        
+        if (menuY < 10) {
+            menuY = 10;
+        }
+        
+        contextMenu.style.left = `${menuX}px`;
+        contextMenu.style.top = `${menuY}px`;
+        contextMenu.classList.add('open');
+    });
+    
+    document.addEventListener('click', (e) => {
+        if (contextMenu && !contextMenu.contains(e.target)) {
+            contextMenu.classList.remove('open');
+        }
+    });
+    
+    document.querySelectorAll('.context-menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            playClickSound();
+            const action = item.getAttribute('data-action');
+            
+            switch (action) {
+                case 'about':
+                    document.querySelector('a[href="#about"]').click();
+                    break;
+                case 'projects':
+                    document.querySelector('a[href="#projects"]').click();
+                    break;
+                case 'timeline':
+                    document.querySelector('a[href="#timeline"]').click();
+                    break;
+                case 'settings':
+                    if (settingsBtn) {
+                        settingsBtn.click();
+                    }
+                    break;
+            }
+            
+            contextMenu.classList.remove('open');
+        });
+    });
+}

@@ -530,6 +530,65 @@ body::before {
     transform: translateY(-1px);
 }
 
+.context-menu {
+    position: fixed;
+    background: var(--card-background);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px var(--shadow-color);
+    z-index: 3000;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.9);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.context-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.context-menu-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+.context-menu-line {
+    width: 4px;
+    height: 16px;
+    background: var(--accent-color);
+    border-radius: 2px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.context-menu-item:first-child {
+    border-radius: 12px 12px 0 0;
+}
+
+.context-menu-item:last-child {
+    border-radius: 0 0 12px 12px;
+}
+
+.context-menu-item:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+.context-menu-item:hover .context-menu-line {
+    background: white;
+}
+
 .navbar {
     position: fixed;
     top: 0;
