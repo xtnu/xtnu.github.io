@@ -35,6 +35,28 @@
             position: relative;
         }
 
+        .sparkle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 3s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .sparkle:nth-child(1) { top: 15%; left: 20%; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: 25%; left: 80%; animation-delay: 0.5s; }
+        .sparkle:nth-child(3) { top: 75%; left: 15%; animation-delay: 1s; }
+        .sparkle:nth-child(4) { top: 85%; left: 75%; animation-delay: 1.5s; }
+        .sparkle:nth-child(5) { top: 50%; left: 90%; animation-delay: 2s; }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 0.8; transform: scale(1); }
+        }
+
         .cat-paw-decorations {
             position: fixed;
             top: 0;
@@ -49,8 +71,9 @@
         .cat-paw {
             position: absolute;
             font-size: 60px;
-            opacity: 0.1;
+            opacity: 0.12;
             animation: float 6s ease-in-out infinite;
+            filter: blur(1px);
         }
 
         .cat-paw:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
@@ -68,17 +91,28 @@
         .container {
             text-align: center;
             z-index: 1;
-            padding: 40px 20px;
+            padding: 50px 30px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(255, 107, 157, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 20px;
         }
 
         .error-404 {
             font-size: 180px;
             font-weight: 800;
-            color: #ff6b9d;
+            background: linear-gradient(135deg, #ff6b9d, #ff8fb3, #ffb6c1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-family: "Pacifico", cursive;
-            text-shadow: 4px 4px 0 #ffd7e6, 8px 8px 20px rgba(255, 107, 157, 0.2);
+            filter: drop-shadow(4px 4px 0 rgba(255, 215, 230, 0.8)) drop-shadow(8px 8px 20px rgba(255, 107, 157, 0.3));
             animation: bounce 2s ease-in-out infinite;
             line-height: 1;
+            margin-bottom: 10px;
         }
 
         @keyframes bounce {
@@ -87,9 +121,16 @@
         }
 
         .cat-face {
-            font-size: 120px;
-            margin: 20px 0;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
             animation: wiggle 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(255, 107, 157, 0.3));
+        }
+
+        .cat-face svg {
+            width: 100%;
+            height: 100%;
         }
 
         @keyframes wiggle {
@@ -98,33 +139,40 @@
         }
 
         .message {
-            font-size: 28px;
-            color: #4a2c40;
-            margin: 20px 0;
-            font-weight: 600;
+            font-size: 32px;
+            background: linear-gradient(135deg, #4a2c40, #6b4c5e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 25px 0 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         .sub-message {
-            font-size: 18px;
+            font-size: 20px;
             color: #8b6b7d;
             margin-bottom: 40px;
+            font-weight: 500;
+            line-height: 1.6;
         }
 
         .back-btn {
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            padding: 16px 40px;
-            background: linear-gradient(135deg, #ff6b9d, #ff8fb3);
+            padding: 18px 45px;
+            background: linear-gradient(135deg, #ff6b9d, #ff8fb3, #ffb6c1);
             color: white;
             text-decoration: none;
             border-radius: 50px;
             font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
-            transition: all 0.3s ease;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4), 0 0 0 0 rgba(255, 107, 157, 0.7);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
         .back-btn::before {
@@ -134,17 +182,34 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s ease;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s ease;
         }
 
         .back-btn:hover::before {
             left: 100%;
         }
 
+        .back-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50px;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.6), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
         .back-btn:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 35px rgba(255, 107, 157, 0.4);
+            transform: translateY(-6px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 107, 157, 0.5), 0 0 30px rgba(255, 107, 157, 0.3);
+        }
+
+        .back-btn:active {
+            transform: translateY(-2px) scale(1.02);
         }
 
         .paw-trail {
@@ -172,16 +237,22 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+                margin: 15px;
+            }
+
             .error-404 {
-                font-size: 120px;
+                font-size: 100px;
             }
 
             .cat-face {
-                font-size: 80px;
+                width: 150px;
+                height: 150px;
             }
 
             .message {
-                font-size: 22px;
+                font-size: 24px;
             }
 
             .sub-message {
@@ -204,6 +275,14 @@
     </style>
 </head>
 <body>
+    <div class="sparkles">
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+    </div>
+
     <div class="cat-paw-decorations">
         <div class="cat-paw">🐾</div>
         <div class="cat-paw">🐾</div>
@@ -215,7 +294,9 @@
 
     <div class="container">
         <div class="error-404">404</div>
-        <div class="cat-face">😺</div>
+        <div class="cat-face">
+            <img src="./static/img/cat.svg" alt="Cat">
+        </div>
         <div class="message">喵~ 页面走丢了</div>
         <div class="sub-message">这只小猫咪好像找不到路了...</div>
         
