@@ -8,6 +8,47 @@ function playClickSound() {
     clickSound.play().catch(e => console.log('Audio playback prevented:', e));
 }
 
+// 页面加载完成后立即隐藏加载动画，不等待外部资源（如图标）
+// 最大等待时间 5 秒，防止网络不好时无限加载
+const loadingScreen = document.getElementById('loadingScreen');
+let loadingHidden = false;
+
+// 隐藏加载动画的函数
+const hideLoading = () => {
+    if (loadingHidden || !loadingScreen) return;
+    loadingHidden = true;
+    loadingScreen.classList.add('hidden');
+    setTimeout(() => {
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
+    }, 600);
+};
+
+// 方案 1: DOM 加载完成后隐藏 (不等待图片和外部资源)
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    // DOM 已经可用，稍后隐藏加载动画
+    setTimeout(() => {
+        hideLoading();
+    }, 500);
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            hideLoading();
+        }, 500);
+    });
+}
+
+// 方案 2: 最大等待时间 5 秒，防止网络不好时无限加载
+setTimeout(() => {
+    hideLoading();
+}, 5000);
+
+window.addEventListener('load', () => {
+    // 页面完全加载后也尝试隐藏（如果还没隐藏的话）
+    hideLoading();
+});
+
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsPanel = document.getElementById('settingsPanel');
 const settingsOverlay = document.getElementById('settingsOverlay');
@@ -18,6 +59,49 @@ const opacitySlider = document.getElementById('opacitySlider');
 const opacityValue = document.getElementById('opacityValue');
 const resetAllBtn = document.getElementById('resetAllBtn');
 const contextMenu = document.getElementById('contextMenu');
+const scrollProgress = document.getElementById('scrollProgress');
+const backToTop = document.getElementById('backToTop');
+const customWallpaperInput = document.getElementById('customWallpaperInput');
+const applyCustomWallpaperBtn = document.getElementById('applyCustomWallpaperBtn');
+const customWallpaperStatus = document.getElementById('customWallpaperStatus');
+
+const CUSTOM_WALLPAPER_KEY = 'customWallpaperUrl';
+const savedCustomWallpaper = localStorage.getItem(CUSTOM_WALLPAPER_KEY);
+
+if (savedCustomWallpaper) {
+    applyWallpaper(savedCustomWallpaper, true);
+    if (customWallpaperInput) {
+        customWallpaperInput.value = savedCustomWallpaper;
+    }
+}
+
+window.addEventListener('scroll', () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrollPercent = (scrollTop / docHeight) * 100;
+    
+    if (scrollProgress) {
+        scrollProgress.style.width = scrollPercent + '%';
+    }
+    
+    if (backToTop) {
+        if (scrollTop > 300) {
+            backToTop.classList.add('visible');
+        } else {
+            backToTop.classList.remove('visible');
+        }
+    }
+});
+
+if (backToTop) {
+    backToTop.addEventListener('click', (e) => {
+        playClickSound();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
 
 const DEFAULT_WALLPAPER = './static/img/background.jpg';
 const WALLPAPER_API = 'https://api.521567.xyz/api/img/bd.php';
@@ -64,12 +148,14 @@ function applyWallpaper(wallpaperUrl, skipCache = false) {
             : `${wallpaperUrl}?t=${timestamp}`;
         
         body.style.backgroundImage = `url("${urlWithCache}")`;
+        body.style.setProperty('--custom-wallpaper', `url("${urlWithCache}")`);
         
         if (!skipCache) {
             localStorage.setItem('wallpaper', wallpaperUrl);
         }
     } else {
         body.style.backgroundImage = `url("${DEFAULT_WALLPAPER}")`;
+        body.style.setProperty('--custom-wallpaper', `url("${DEFAULT_WALLPAPER}")`);
         localStorage.removeItem('wallpaper');
     }
 }
@@ -189,16 +275,33 @@ if (randomWallpaperBtn) {
                 const data = await response.json();
                 if (data.url) {
                     applyWallpaper(data.url);
+                    localStorage.setItem(CUSTOM_WALLPAPER_KEY, data.url);
+                    if (customWallpaperInput) {
+                        customWallpaperInput.value = data.url;
+                    }
+                    showCustomWallpaperStatus('随机壁纸已加载并缓存！', 'success');
                 } else {
                     applyWallpaper(apiUrl);
+                    localStorage.setItem(CUSTOM_WALLPAPER_KEY, apiUrl);
+                    if (customWallpaperInput) {
+                        customWallpaperInput.value = apiUrl;
+                    }
                 }
             } else {
                 applyWallpaper(apiUrl);
+                localStorage.setItem(CUSTOM_WALLPAPER_KEY, apiUrl);
+                if (customWallpaperInput) {
+                    customWallpaperInput.value = apiUrl;
+                }
             }
         } catch (error) {
             const timestamp = new Date().getTime();
             const apiUrl = `${WALLPAPER_API}?t=${timestamp}`;
             applyWallpaper(apiUrl);
+            localStorage.setItem(CUSTOM_WALLPAPER_KEY, apiUrl);
+            if (customWallpaperInput) {
+                customWallpaperInput.value = apiUrl;
+            }
         }
         
         randomWallpaperBtn.classList.remove('loading');
@@ -209,6 +312,110 @@ if (resetWallpaperBtn) {
     resetWallpaperBtn.addEventListener('click', () => {
         playClickSound();
         applyWallpaper(null);
+        localStorage.removeItem(CUSTOM_WALLPAPER_KEY);
+        if (customWallpaperInput) {
+            customWallpaperInput.value = '';
+        }
+    });
+}
+
+function showCustomWallpaperStatus(message, type = 'loading') {
+    if (!customWallpaperStatus) return;
+    
+    const icons = {
+        success: '✓',
+        error: '✕',
+        loading: '⟳'
+    };
+    
+    customWallpaperStatus.className = `custom-wallpaper-status ${type}`;
+    customWallpaperStatus.innerHTML = `
+        <span class="status-icon">${icons[type]}</span>
+        <span class="status-text">${message}</span>
+        <span class="status-close" onclick="this.parentElement.style.display='none'">✕</span>
+    `;
+    
+    if (type !== 'loading') {
+        setTimeout(() => {
+            customWallpaperStatus.style.display = 'none';
+        }, 5000);
+    }
+}
+
+function isValidUrl(string) {
+    try {
+        const url = new URL(string);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+        return false;
+    }
+}
+
+async function validateImageUrl(url) {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        const contentType = response.headers.get('content-type');
+        return contentType && contentType.includes('image/');
+    } catch (error) {
+        return true;
+    }
+}
+
+if (applyCustomWallpaperBtn && customWallpaperInput) {
+    applyCustomWallpaperBtn.addEventListener('click', async () => {
+        const imageUrl = customWallpaperInput.value.trim();
+        
+        if (!imageUrl) {
+            showCustomWallpaperStatus('请输入图片链接或 API 接口', 'error');
+            return;
+        }
+        
+        if (!isValidUrl(imageUrl)) {
+            showCustomWallpaperStatus('请输入有效的 URL 地址', 'error');
+            return;
+        }
+        
+        playClickSound();
+        applyCustomWallpaperBtn.classList.add('loading');
+        showCustomWallpaperStatus('正在验证并加载图片...', 'loading');
+        
+        try {
+            const isValid = await validateImageUrl(imageUrl);
+            
+            if (!isValid) {
+                showCustomWallpaperStatus('该链接可能不是有效的图片地址', 'error');
+                applyCustomWallpaperBtn.classList.remove('loading');
+                return;
+            }
+            
+            const timestamp = new Date().getTime();
+            const urlWithCache = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${timestamp}`;
+            
+            const img = new Image();
+            img.onload = () => {
+                applyWallpaper(imageUrl);
+                localStorage.setItem(CUSTOM_WALLPAPER_KEY, imageUrl);
+                showCustomWallpaperStatus('壁纸已成功应用并缓存！', 'success');
+                applyCustomWallpaperBtn.classList.remove('loading');
+            };
+            
+            img.onerror = () => {
+                showCustomWallpaperStatus('图片加载失败，请检查链接是否正确', 'error');
+                applyCustomWallpaperBtn.classList.remove('loading');
+            };
+            
+            img.src = urlWithCache;
+            
+        } catch (error) {
+            showCustomWallpaperStatus('加载失败：' + error.message, 'error');
+            applyCustomWallpaperBtn.classList.remove('loading');
+        }
+    });
+    
+    customWallpaperInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            applyCustomWallpaperBtn.click();
+        }
     });
 }
 
@@ -237,6 +444,10 @@ if (resetAllBtn) {
             }
             if (opacityValue) {
                 opacityValue.textContent = `${DEFAULT_OPACITY}%`;
+            }
+            
+            if (customWallpaperInput) {
+                customWallpaperInput.value = '';
             }
             
             const styleElement = document.getElementById('opacity-style');
@@ -273,9 +484,10 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+            const offsetTop = target.offsetTop - 60;
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
             });
         }
     });

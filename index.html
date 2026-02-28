@@ -36,6 +36,20 @@
     <link rel="stylesheet" href="./static/css/style.css">
 </head>
 <body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <img src="./static/img/logo.png" alt="Loading" class="loading-avatar">
+            <div class="loading-text">Loading...</div>
+            <div class="loading-paws">
+                <div class="loading-paw">🐾</div>
+                <div class="loading-paw">🐾</div>
+                <div class="loading-paw">🐾</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+
     <div class="cat-paw-decorations">
         <div class="cat-paw">🐾</div>
         <div class="cat-paw">🐾</div>
@@ -94,6 +108,15 @@
                         
                         <span>重置壁纸</span>
                     </button>
+                </div>
+                <div class="custom-wallpaper-section">
+                    <div class="custom-wallpaper-input-wrapper">
+                        <input type="text" class="custom-wallpaper-input" id="customWallpaperInput" placeholder="输入图片链接或 API 接口...">
+                        <button class="custom-wallpaper-btn" id="applyCustomWallpaperBtn" title="应用自定义壁纸">
+                            <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M512 85.333333a42.666667 42.666667 0 0 1 42.666667 42.666667v341.333333h341.333333a42.666667 42.666667 0 1 1 0 85.333334h-341.333333v341.333333a42.666667 42.666667 0 1 1-85.333334 0v-341.333333h-341.333333a42.666667 42.666667 0 1 1 0-85.333334h341.333333v-341.333333a42.666667 42.666667 0 0 1 42.666667-42.666667z" fill="currentColor"></path></svg>
+                        </button>
+                    </div>
+                    <div class="custom-wallpaper-status" id="customWallpaperStatus"></div>
                 </div>
             </div>
             <div class="settings-section">
@@ -244,9 +267,16 @@
         <div class="footer-text">Xtn © 2025</div>
         <div class="footer-links">
             <a href="https://521567.xyz/" class="footer-link">主页</a>
-            <a href="https://icp.gov.moe/?keyword=20268999" class="footer-link" target="_blank">萌ICP备20268999号</a>
-       <a href="https://icp.gov.moe/?keyword=20256661" class="footer-link" target="_blank">萌ICP备20256661号</a>
-
+            <a href="https://icp.gov.moe/?keyword=20268999" class="footer-link" target="_blank">萌ICP 备 20268999 号</a>
+            <a href="https://icp.gov.moe/?keyword=20256661" class="footer-link" target="_blank">萌ICP 备 20256661 号</a>
+        </div>
+        <div class="footer-links">
+            <a href="https://github.com/xtnu/xtnu.github.io" class="footer-link" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub 源码
+            </a>
         </div>
         <div class="footer-copyright">
             ❤️
@@ -270,6 +300,10 @@
             <span class="context-menu-line"></span>
             <span>设置</span>
         </div>
+    </div>
+
+    <div class="back-to-top" id="backToTop">
+        <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M512 384L256 640h512L512 384z" fill="currentColor"></path></svg>
     </div>
 
     <script src="./static/js/main.js"></script>
