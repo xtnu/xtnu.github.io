@@ -11,10 +11,10 @@
     "bio": "独立开发者 / 准星助手编辑作者"
   },
   "announcement": {
-    "enabled": false,
+    "enabled": true,
     "version": "1",
     "showOnce": false,
-    "showAsBanner": false,
+    "showAsBanner": true,
     "title": "欢迎使用准星助手",
     "date": "2026-07-27",
     "content": "准星助手已更新至最新版本，支持防录屏、预设管理等功能。\n如有问题请访问 http://www.521567.xyz/app/crosshair 反馈。",
