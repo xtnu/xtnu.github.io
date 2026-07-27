@@ -11,7 +11,7 @@
     "bio": "独立开发者 / 准星助手编辑作者"
   },
   "announcement": {
-    "enabled": true,
+    "enabled": false,
     "version": "1",
     "showOnce": false,
     "showAsBanner": false,
