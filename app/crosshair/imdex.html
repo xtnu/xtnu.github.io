@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>准星助手 - Crosshair Assistant</title>
+    <meta name="description" content="准星助手 - 一款功能强大的游戏准星辅助工具，支持多种样式、位置调节和预设功能。">
+    <link rel="icon" href="./icon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #007aff;
+            --primary-dark: #0066d6;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f7;
+            --bg-tertiary: #fafafa;
+            --border: #d2d2d7;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-logo img {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+        }
+
+        .nav-link {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+            opacity: 0.8;
+        }
+
+        .nav-link:hover {
+            opacity: 1;
+        }
+
+        .hero {
+            padding: 140px 0 80px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+        }
+
+        .hero-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 28px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+
+        .hero-subtitle {
+            font-size: 21px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+            letter-spacing: 0.004em;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            font-size: 17px;
+            font-weight: 500;
+            border-radius: 980px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 122, 255, 0.05);
+        }
+
+        .section {
+            padding: 100px 0;
+        }
+
+        .section-alt {
+            background: var(--bg-secondary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .section-title {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+
+        .section-subtitle {
+            font-size: 21px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            letter-spacing: 0.004em;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            padding: 36px 28px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .feature-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .feature-desc {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .screenshots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .screenshot-item {
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            aspect-ratio: 9/16;
+            background: var(--bg-tertiary);
+        }
+
+        .screenshot-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .download-section {
+            text-align: center;
+        }
+
+        .download-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: 60px 48px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+        }
+
+        .download-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin: 0 auto 24px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .download-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .download-subtitle {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .download-info {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .download-info-item {
+            text-align: center;
+        }
+
+        .download-info-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .download-info-value {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0;
+        }
+
+        footer {
+            background: var(--bg-secondary);
+            padding: 48px 0 32px;
+        }
+
+        .footer-content {
+            text-align: center;
+        }
+
+        .footer-acknowledgment {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .footer-acknowledgment-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .footer-acknowledgment-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .footer-acknowledgment-text a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .footer-acknowledgment-text a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-copy {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .footer-links {
+            margin-top: 12px;
+        }
+
+        .footer-links a {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 100px 0 60px;
+            }
+
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .hero-subtitle {
+                font-size: 19px;
+            }
+
+            .section {
+                padding: 64px 0;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+
+            .section-subtitle {
+                font-size: 19px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .screenshots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .download-card {
+                padding: 40px 24px;
+            }
+
+            .download-title {
+                font-size: 26px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .screenshots {
+                grid-template-columns: 1fr;
+            }
+
+            .download-info {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <img src="./icon.png" alt="准星助手">
+                <span>准星助手</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">功能</a>
+                <a href="#screenshots" class="nav-link">截图</a>
+                <a href="#download" class="nav-link">下载</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <img src="./icon.png" alt="准星助手" class="hero-icon fade-in">
+            <h1 class="hero-title fade-in">准星助手</h1>
+            <p class="hero-subtitle fade-in">游戏准星辅助工具，精准瞄准，提升体验</p>
+            <div class="hero-buttons fade-in">
+                <a href="#download" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    立即下载
+                </a>
+                <a href="#features" class="btn btn-secondary">了解更多</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">强大功能</h2>
+                <p class="section-subtitle">免费无广告，适配多家主流系统</p>
+            </div>
+            <div class="features">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <line x1="12" y1="2" x2="12" y2="6"></line>
+                            <line x1="12" y1="18" x2="12" y2="22"></line>
+                            <line x1="2" y1="12" x2="6" y2="12"></line>
+                            <line x1="18" y1="12" x2="22" y2="12"></line>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">准星显示</h3>
+                    <p class="feature-desc">一键开启/关闭准星，支持多种准星样式，满足不同游戏场景需求。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 19V5"></path>
+                            <path d="M5 12l7-7 7 7"></path>
+                            <path d="M19 21H5"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">位置调节</h3>
+                    <p class="feature-desc">精确控制准星位置，支持上下左右微调，找到最佳瞄准点。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">预设管理</h3>
+                    <p class="feature-desc">内置多种准星预设，支持预设导入导出，一键切换快速适配。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 1.54l4.24 4.24M20.46 20.46l-4.24-4.24M1.54 20.46l4.24-4.24"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">样式自定义</h3>
+                    <p class="feature-desc">自由调整准星颜色、大小、透明度，打造专属瞄准体验。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">安全防护</h3>
+                    <p class="feature-desc">支持防录屏防截屏，保护游戏安全，纯本地运行无需联网。</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                            <path d="M2 17l10 5 10-5"></path>
+                            <path d="M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">免费无广告</h3>
+                    <p class="feature-desc">完全免费，无任何广告干扰，纯净体验，即下即用。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="section section-alt" id="screenshots">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2 class="section-title">应用截图</h2>
+                <p class="section-subtitle">直观了解应用界面与功能</p>
+            </div>
+            <div class="screenshots">
+                <div class="screenshot-item fade-in">
+                    <img src="./img/1.jpg" alt="截图 1">
+                </div>
+                <div class="screenshot-item fade-in">
+                    <img src="./img/2.jpg" alt="截图 2">
+                </div>
+                <div class="screenshot-item fade-in">
+                    <img src="./img/3.jpg" alt="截图 3">
+                </div>
+                <div class="screenshot-item fade-in">
+                    <img src="./img/4.jpg" alt="截图 4">
+                </div>
+                <div class="screenshot-item fade-in">
+                    <img src="./img/5.jpg" alt="截图 5">
+                </div>
+                <div class="screenshot-item fade-in">
+                    <img src="./img/6.jpg" alt="截图 6">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="download">
+        <div class="container">
+            <div class="download-section fade-in">
+                <div class="download-card">
+                    <img src="./icon.png" alt="准星助手" class="download-icon">
+                    <h2 class="download-title">下载准星助手</h2>
+                    <p class="download-subtitle">版本 v1.6.1 · 兼容 Android 11-16</p>
+                    <div class="download-info">
+                        <div class="download-info-item">
+                            <div class="download-info-label">版本</div>
+                            <div class="download-info-value">v1.6.1</div>
+                        </div>
+                        <div class="download-info-item">
+                            <div class="download-info-label">大小</div>
+                            <div class="download-info-value">2.83MB</div>
+                        </div>
+                        <div class="download-info-item">
+                            <div class="download-info-label">系统</div>
+                            <div class="download-info-value">Android 11-16</div>
+                        </div>
+                        <div class="download-info-item">
+                            <div class="download-info-label">包名</div>
+                            <div class="download-info-value" style="font-size: 14px;">com.xtn.crosshair</div>
+                        </div>
+                    </div>
+                    <a href="./com.xtn.crosshair_v1.6.1.apk" class="btn btn-primary" download>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        下载 APK
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-acknowledgment">
+                    <div class="footer-acknowledgment-title">开源致谢</div>
+                    <div class="footer-acknowledgment-text">
+                        本软件基于 <a href="https://github.com/314432150/SightMate" target="_blank">SightMate</a> 开发，
+                        遵循 MIT License 开源协议。感谢原作者的贡献。
+                    </div>
+                </div>
+                <div class="footer-copy">&copy; 2025 准星助手. All rights reserved.</div>
+                <div class="footer-links">
+                    <a href="https://github.com/" target="_blank">GitHub</a>
+                    <span style="color: var(--text-secondary); opacity: 0.5;">|</span>
+                    <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href');
+                if (href.startsWith('#')) {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
