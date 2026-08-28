@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夏透喃个人主页 - Xtn</title>
+    <link rel="icon" href="./static/img/favicon.ico">
+    <meta name="description" content="Xtn的首页，通过这里你可以方便的访问其他项目，方便的数据展示了解有关Xtn的更多内容。">
+    <meta name="keywords" content="xtn,喃娘,nanniang,喃娘主页,夏透喃引导页,NanNiang，XtnAPI,喃娘API,免费API">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="夏透喃个人主页 - Xtn">
+    <meta property="og:description" content="Xtn的首页，通过这里你可以方便的访问其他项目，方便的数据展示了解有关Xtn的更多内容。">
+    <meta property="og:image" content="./static/img/logo.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="夏透喃个人主页 - Xtn">
+    <meta name="twitter:description" content="Xtn的首页，通过这里你可以方便的访问其他项目，方便的数据展示了解有关Xtn的更多内容。">
+    <meta name="twitter:image" content="./static/img/logo.png">
+
+    <link rel="stylesheet" href="./static/css/style.css">
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-emblem">
+                <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true">
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="3"/>
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                    <path d="M50 18 L58.8 38.2 L80.9 38.2 L63 51.6 L69.8 71.8 L50 58.4 L30.2 71.8 L37 51.6 L19.1 38.2 L41.2 38.2 Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="loading-text">页面加载中</div>
+            <div class="loading-bar">
+                <div class="loading-bar-inner"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <button class="settings-btn" id="settingsBtn">
+        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M509.387755 666.122449c-83.591837 0-151.510204-67.918367-151.510204-151.510204s67.918367-151.510204 151.510204-151.510204 151.510204 67.918367 151.510204 151.510204-67.918367 151.510204-151.510204 151.510204z m0-261.22449c-60.604082 0-109.714286 49.110204-109.714286 109.714286s49.110204 109.714286 109.714286 109.714286 109.714286-49.110204 109.714286-109.714286-49.110204-109.714286-109.714286-109.714286z" fill="currentColor"></path><path d="M556.408163 929.959184h-83.591836c-47.542857 0-86.204082-38.661224-86.204082-86.204082v-22.987755c0-1.044898-0.522449-2.089796-1.567347-2.612245h-0.522449c-1.044898-0.522449-2.089796 0-3.134694 0.522449l-14.628571 15.15102c-16.195918 16.195918-37.093878 25.077551-59.559184 25.077551-22.465306 0-43.363265-8.881633-59.036735-24.555102l-59.036734-59.036734c-32.391837-32.391837-32.391837-85.159184 0-118.07347l15.673469-15.15102c1.044898-1.044898 1.044898-2.089796 0.522449-3.134694v-0.522449c-0.522449-1.044898-1.567347-1.567347-2.612245-1.567347h-22.987755c-47.542857 0-86.204082-38.661224-86.204082-86.204082v-78.367346c0.522449-47.020408 39.183673-85.681633 86.726531-85.681633h21.420408c1.044898 0 2.089796-0.522449 2.612245-2.089796 0.522449-1.044898 1.044898-2.612245 1.567347-3.657143 0.522449-1.044898 0-2.089796-0.522449-3.134694l-16.195918-16.718367C156.734694 329.142857 156.734694 275.853061 189.126531 243.461224l59.036734-59.036734c15.673469-15.673469 36.571429-24.555102 59.036735-24.555102 22.465306 0 43.363265 8.881633 59.036735 24.555102l15.15102 15.673469c0.522449 1.044898 2.089796 1.044898 3.134694 0.522449h0.522449c1.044898-0.522449 1.567347-1.567347 1.567347-2.612245v-17.763265C386.612245 132.702041 425.273469 94.040816 472.816327 94.040816h83.591836c44.408163 0 80.979592 36.571429 80.979592 80.979592v21.420408c0 1.044898 0.522449 2.089796 2.089796 2.612245 1.567347 0.522449 2.612245 1.044898 3.657143 1.567347 1.044898 0.522449 2.089796 0 3.134694-0.522449l16.718367-16.195918c32.391837-32.391837 85.681633-32.391837 118.07347 0l59.036734 59.036734c15.673469 15.673469 24.555102 36.571429 24.555102 59.036735 0 22.465306-8.881633 43.363265-24.555102 59.036735l-15.15102 15.15102c-1.044898 1.044898-1.044898 2.089796-0.522449 3.134694v0.522449c0.522449 1.044898 1.567347 1.567347 2.612245 1.567347h22.987755c47.542857 0 86.204082 38.661224 86.204082 86.204082v83.591837c0 47.542857-38.661224 86.204082-86.204082 86.204082h-21.420408c-1.044898 0-2.089796 0.522449-2.612245 2.089796-0.522449 1.044898-1.044898 2.612245-1.567347 3.657143-0.522449 1.044898 0 2.089796 0.522449 3.134694l16.195918 16.718367c32.391837 32.391837 32.391837 85.681633 0 118.07347l-59.036734 59.036734c-15.673469 15.673469-36.571429 24.555102-59.036735 24.555102-22.465306 0-43.363265-8.881633-59.036735-24.555102l-15.15102-15.673469c-0.522449-1.044898-2.089796-1.044898-3.134694-0.522449h-0.522449c-1.044898 0.522449-1.567347 1.567347-1.567347 2.612245v22.987755c0 47.542857-38.661224 86.204082-86.204082 86.204082z" fill="currentColor"></path></svg>
+        <span class="settings-btn-text">显示设置</span>
+    </button>
+
+    <div class="settings-overlay" id="settingsOverlay"></div>
+
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <div class="settings-title">显示设置</div>
+            <button class="settings-close" id="settingsClose">
+                <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M175.991861 276.41489l598.673018 550.929757a49.755746 49.755746 0 0 0 70.490266-3.077919c18.615491-20.391214 17.242266-52.070104-3.066081-70.762543L243.416046 202.574428a49.755746 49.755746 0 0 0-70.490266 3.077919c-18.615491 20.391214-17.242266 52.070104 3.066081 70.762543z" fill="currentColor"></path><path d="M270.495815 848.008139l550.929757-598.673018a49.755746 49.755746 0 0 0-3.077919-70.490266c-20.391214-18.615491-52.070104-17.242266-70.762543 3.066081L196.655353 780.583954a49.755746 49.755746 0 0 0 3.077919 70.490266c20.391214 18.615491 52.070104 17.242266 70.762543-3.066081z" fill="currentColor"></path></svg>
+            </button>
+        </div>
+        <div class="settings-content">
+            <div class="settings-section">
+                <div class="settings-section-title">配色方案</div>
+                <div class="color-options">
+                    <div class="color-option pink active" data-theme="pink"></div>
+                    <div class="color-option mint" data-theme="mint"></div>
+                    <div class="color-option yellow" data-theme="yellow"></div>
+                    <div class="color-option purple" data-theme="purple"></div>
+                    <div class="color-option blue" data-theme="blue"></div>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">显示模式</div>
+                <div class="mode-options">
+                    <div class="mode-option" data-mode="light">
+                        <div class="mode-label">日间模式</div>
+                        <div class="mode-toggle"></div>
+                    </div>
+                    <div class="mode-option" data-mode="dark">
+                        <div class="mode-label">夜间模式</div>
+                        <div class="mode-toggle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">壁纸设置</div>
+                <div class="wallpaper-options">
+                    <button class="wallpaper-btn" id="randomWallpaperBtn">
+                        <span class="wallpaper-loading"></span>
+                        <span>随机壁纸</span>
+                    </button>
+                    <button class="wallpaper-btn reset" id="resetWallpaperBtn">
+                        <span>重置壁纸</span>
+                    </button>
+                </div>
+                <div class="custom-wallpaper-section">
+                    <div class="custom-wallpaper-input-wrapper">
+                        <input type="text" class="custom-wallpaper-input" id="customWallpaperInput" placeholder="输入图片链接或 API 接口...">
+                        <button class="custom-wallpaper-btn" id="applyCustomWallpaperBtn" title="应用自定义壁纸">
+                            <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M512 85.333333a42.666667 42.666667 0 0 1 42.666667 42.666667v341.333333h341.333333a42.666667 42.666667 0 1 1 0 85.333334h-341.333333v341.333333a42.666667 42.666667 0 1 1-85.333334 0v-341.333333h-341.333333a42.666667 42.666667 0 1 1 0-85.333334h341.333333v-341.333333a42.666667 42.666667 0 0 1 42.666667-42.666667z" fill="currentColor"></path></svg>
+                        </button>
+                    </div>
+                    <div class="custom-wallpaper-status" id="customWallpaperStatus"></div>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">背景透明度</div>
+                <div class="opacity-section">
+                    <div class="opacity-label">
+                        <span>遮罩透明度</span>
+                        <span class="opacity-value" id="opacityValue">70%</span>
+                    </div>
+                    <input type="range" class="opacity-slider" id="opacitySlider" min="0" max="100" value="70">
+                </div>
+            </div>
+            <button class="reset-all-btn" id="resetAllBtn">
+                重置所有设置
+            </button>
+        </div>
+    </div>
+
+    <!-- 无障碍工具条 -->
+    <div class="a11ybar">
+        <div class="wrap a11ybar-inner">
+            <div class="a11y-tools">
+                <span class="a11ybar-label">无障碍浏览</span>
+                <button type="button" class="a11y-btn" id="fontSmall" title="缩小字体">A-</button>
+                <button type="button" class="a11y-btn" id="fontNormal" title="标准字体">A</button>
+                <button type="button" class="a11y-btn" id="fontLarge" title="放大字体">A+</button>
+                <span class="a11y-sep"></span>
+                <button type="button" class="a11y-btn" id="contrastBtn" title="切换高对比度">高对比度</button>
+                <button type="button" class="a11y-btn" id="printBtn" title="打印本页">打印本页</button>
+            </div>
+            <div class="a11y-stat">
+                本站已启用无障碍浏览辅助功能
+            </div>
+        </div>
+    </div>
+
+    <!-- 顶部工具条 -->
+    <div class="utilbar">
+        <div class="wrap utilbar-inner">
+            <span class="utilbar-greeting">您好，欢迎访问夏透喃个人主页</span>
+            <div class="utilbar-links">
+                <a href="https://github.com/xtnu" target="_blank">GitHub</a>
+                <span class="sep">|</span>
+                <a href="mailto:xtn@vip.qq.com">联系我们</a>
+                <span class="sep">|</span>
+                <a href="#links">网站地图</a>
+                <span class="sep">|</span>
+                <a href="mailto:xtn@vip.qq.com?subject=纠错反馈">纠错反馈</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 站点头部 -->
+    <header class="site-header">
+        <div class="wrap site-header-inner">
+            <a href="#" class="brand">
+                <span class="brand-emblem">
+                    <svg viewBox="0 0 100 100" width="54" height="54" aria-hidden="true">
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="3"/>
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.45"/>
+                        <path d="M50 18 L58.8 38.2 L80.9 38.2 L63 51.6 L69.8 71.8 L50 58.4 L30.2 71.8 L37 51.6 L19.1 38.2 L41.2 38.2 Z" fill="currentColor"/>
+                    </svg>
+                </span>
+                <span class="brand-text">
+                    <span class="brand-name">夏透喃个人主页</span>
+                    <span class="brand-sub">WWW.521567.XYZ · 全栈娱乐工程师</span>
+                </span>
+            </a>
+            <div class="site-search" id="siteSearch">
+                <div class="site-search-box">
+                    <input type="text" class="site-search-input" id="searchInput"
+                           placeholder="搜索本站内容" autocomplete="off" aria-label="站内搜索">
+                    <button type="button" class="site-search-btn" id="searchBtn">搜索</button>
+                </div>
+                <div class="search-panel" id="searchPanel" role="listbox"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主导航 -->
+    <nav class="mainnav">
+        <div class="wrap">
+            <ul class="mainnav-list">
+                <li><a href="#" class="active">首　页</a></li>
+                <li><a href="#about">个人档案</a></li>
+                <li><a href="#apps">工具服务</a></li>
+                <li><a href="#projects">项目展示</a></li>
+                <li><a href="#timeline">成长历程</a></li>
+                <li><a href="#links">留言联系</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 面包屑 -->
+    <div class="crumb">
+        <div class="wrap crumb-inner">
+            <span class="crumb-path">
+                当前位置：<a href="#">首页</a> &gt; <a href="#about">个人档案</a> &gt; <span class="crumb-current">基本信息</span>
+            </span>
+            <span class="crumb-date" id="govDate">—</span>
+        </div>
+    </div>
+
+    <!-- 主体内容 -->
+    <main class="main wrap">
+
+        <!-- 个人概况 -->
+        <section class="panel" id="about">
+            <div class="panel-head">
+                <h2 class="panel-title" data-kw="grda geren dangan 个人 档案 简介 关于 照片">个人档案</h2>
+                <a href="#about" class="panel-more">更多 &gt;&gt;</a>
+            </div>
+            <div class="panel-body">
+                <div class="profile">
+                    <div class="profile-photo">
+                        <img src="./static/img/logo.png" alt="Xtn">
+                        <div class="profile-photo-cap">Xtn　近照</div>
+                    </div>
+                    <div class="profile-detail">
+                        <h3 class="profile-name">Xtn（夏透喃）</h3>
+                        <p class="profile-desc">全栈娱乐工程师。长期从事 Web 开发、接口服务与安卓工具研发，业余时间沉迷网络，已放弃治疗。</p>
+                        <table class="infotable">
+                            <tbody>
+                                <tr>
+                                    <th>姓　　名</th><td>Xtn</td>
+                                    <th>网　　名</th><td>夏透喃 / Xtn</td>
+                                </tr>
+                                <tr>
+                                    <th>职　　业</th><td>全栈娱乐工程师</td>
+                                    <th>联系邮箱</th><td><a href="mailto:xtn@vip.qq.com">xtn@vip.qq.com</a></td>
+                                </tr>
+                                <tr>
+                                    <th>技术领域</th><td>Web 开发 / 接口服务 / 安卓工具</td>
+                                    <th>短驻平台</th><td><a href="https://github.com/xtnu" target="_blank">GitHub</a></td>
+                                </tr>
+                                <tr>
+                                    <th>当前状态</th><td colspan="3">
+                                        <span class="statustag">网瘾</span>
+                                        <span class="statustag">没救了</span>
+                                        <span class="statustag">放弃</span>
+                                        <span class="statustag">Emo</span>
+                                        <span class="statustag">啥也不是</span>
+                                        <span class="statustag">以泪洗面</span>
+                                        <span class="statustag">没有念想</span>
+                                        <span class="statustag">算了</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="profile-actions">
+                          <!--  <a href="https://github.com/xtnu" class="btn btn-primary" target="_blank">前往 GitHub 主页</a>
+                            <a href="mailto:xtn@vip.qq.com" class="btn">发送邮件</a>
+                        </div>-->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 工具服务 -->
+        <div class="grid-1">
+            <section class="panel" id="apps">
+                <div class="panel-head">
+                    <h2 class="panel-title" data-kw="zxgj zaixian gongju 在线 工具 应用 下载">工具服务</h2>
+                    <a href="#apps" class="panel-more">更多 &gt;&gt;</a>
+                </div>
+                <div class="panel-body">
+                    <ul class="servlist">
+                        <li>
+                            <a href="./app/crosshair/index.html">
+                                <span class="serv-icon">
+                                    <img src="./app/crosshair/icon.png" alt="准星助手">
+                                </span>
+                                <span class="serv-text">
+                                    <span class="serv-name">准星助手</span>
+                                    <span class="serv-desc">游戏准星辅助工具</span>
+                                </span>
+                                <span class="serv-go">进入 &gt;</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./app/nounlockroot/index.html">
+                                <span class="serv-icon">
+                                    <img src="./app/nounlockroot/icon.jpg" alt="免解锁Root工具">
+                                </span>
+                                <span class="serv-text">
+                                    <span class="serv-name">免解锁Root工具</span>
+                                    <span class="serv-desc">免解锁 BL 一键刷 Root</span>
+                                </span>
+                                <span class="serv-go">进入 &gt;</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="notice-box">
+                        <strong>提示：</strong>以上服务均为个人开发项目，使用过程中产生的一切风险由使用者自行承担。
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 项目展示 -->
+        <section class="panel" id="projects">
+            <div class="panel-head">
+                <h2 class="panel-title" data-kw="xmzs xiangmu zhanshi 项目 展示 作品 接口 api">项目展示</h2>
+                <a href="#projects" class="panel-more">更多 &gt;&gt;</a>
+            </div>
+            <div class="panel-body">
+                <table class="datatable">
+                    <thead>
+                        <tr>
+                            <th style="width:18%">项目名称</th>
+                            <th style="width:42%">项目说明</th>
+                            <th style="width:24%">访问地址</th>
+                            <th style="width:16%">更新日期</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Blog</strong></td>
+                            <td>无聊发发的博客</td>
+                            <td><a href="https://blog.521567.xyz/" target="_blank">blog.521567.xyz</a></td>
+                            <td>2026-08-10</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Whois</strong></td>
+                            <td>域名信息查询工具</td>
+                            <td><a href="https://whois.521567.xyz/" target="_blank">whois.521567.xyz</a></td>
+                            <td>2026-07-22</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API</strong></td>
+                            <td>夏头喃机器人调用接口分享</td>
+                            <td><a href="https://api.521567.xyz/" target="_blank">api.521567.xyz</a></td>
+                            <td>2026-08-01</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MdJs</strong></td>
+                            <td>纯静态极简文档渲染器</td>
+                            <td><a href="https://mdjs.js.org/" target="_blank">mdjs.js.org</a></td>
+                            <td>2026-06-15</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- 三栏：最新动态 / 更新日志 / 自勉守则 -->
+        <div class="grid-3">
+            <section class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title" data-kw="zxdt zuixin dongtai 最新 动态 状态 近况">最新动态</h2>
+                    <a href="#about" class="panel-more">更多 &gt;&gt;</a>
+                </div>
+                <div class="panel-body">
+                    <ul class="newslist">
+                        <li><a href="#about" data-kw="wangyin 网瘾 上瘾 状态">近期状态说明：网瘾持续中</a><span class="newslist-date">2026-08-28</span></li>
+                        <li><a href="#about" data-kw="fangqi 放弃 治疗 没救">状态更新：已放弃治疗</a><span class="newslist-date">2026-08-15</span></li>
+                        <li><a href="#about" data-kw="emo 情绪 抑郁 难受">Emo 情绪日常管理记录</a><span class="newslist-date">2026-07-30</span></li>
+                        <li><a href="#about" data-kw="yileiximian 以泪洗面 哭 流泪">"以泪洗面"阶段性小结</a><span class="newslist-date">2026-07-10</span></li>
+                        <li><a href="#about" data-kw="chongxinzuoren 重新做人 计划">撤销"重新做人"计划</a><span class="newslist-date">2026-06-20</span></li>
+                        <li><a href="#about" data-kw="yishiwucheng 一事无成 统计">本年度总结：一事无成</a><span class="newslist-date">2026-05-08</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title" data-kw="gxrz gengxin rizhi 更新 日志 版本 changelog">更新日志</h2>
+                    <a href="#about" class="panel-more">更多 &gt;&gt;</a>
+                </div>
+                <div class="panel-body">
+                    <ul class="newslist">
+                        <li><a href="#about">本站完成页面风格改版升级</a><span class="newslist-date">2026-08-28</span></li>
+                        <li><a href="#about">免解锁 Root 工具箱完成新增机型适配</a><span class="newslist-date">2026-08-12</span></li>
+                        <li><a href="#about">准星助手发布 v1.6.1 版本更新</a><span class="newslist-date">2026-07-28</span></li>
+                        <li><a href="#about">API 接口服务完成架构迁移</a><span class="newslist-date">2026-07-05</span></li>
+                        <li><a href="#about">个人博客开设技术文档专栏</a><span class="newslist-date">2026-06-18</span></li>
+                        <li><a href="#about">MdJs 文档渲染器开源发布</a><span class="newslist-date">2026-06-01</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h2 class="panel-title" data-kw="zmsz zimian shouze 守则 自律 规范 想法">自勉守则</h2>
+                    <a href="#about" class="panel-more">更多 &gt;&gt;</a>
+                </div>
+                <div class="panel-body">
+                    <ul class="newslist">
+                        <li><a href="#about" data-kw="aoye 熬夜 晚睡 通宵">《熬夜行为规范（自用）》</a><span class="newslist-date">2026-08-20</span></li>
+                        <li><a href="#about">《网络成瘾自我管理（试行）》</a><span class="newslist-date">2026-07-18</span></li>
+                        <li><a href="#about" data-kw="nejuan 内卷 卷">《拒绝内卷行动方案》</a><span class="newslist-date">2026-06-28</span></li>
+                        <li><a href="#about">《个人情绪管理办法》</a><span class="newslist-date">2026-06-02</span></li>
+                        <li><a href="#about">《减少无效社交的几点想法》</a><span class="newslist-date">2026-05-15</span></li>
+                        <li><a href="#about" data-kw="tangping 躺平 摆烂">《躺平行为认定标准》</a><span class="newslist-date">2026-04-30</span></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+
+
+        <!-- 大事记 -->
+        <section class="panel" id="timeline">
+            <div class="panel-head">
+                <h2 class="panel-title" data-kw="czlc chengzhang licheng 成长 历程 时间线 年份">成长历程</h2>
+                <a href="#timeline" class="panel-more">更多 &gt;&gt;</a>
+            </div>
+            <div class="panel-body">
+                <ul class="loglist">
+                    <li>
+                        <span class="log-year">2025</span>
+                        <span class="log-text">混吃等死</span>
+                    </li>
+                    <li>
+                        <span class="log-year">2024</span>
+                        <span class="log-text">一事无成</span>
+                    </li>
+                    <li>
+                        <span class="log-year">2023</span>
+                        <span class="log-text">一事无成</span>
+                    </li>
+                    <li>
+                        <span class="log-year">2021</span>
+                        <span class="log-text">一事无成</span>
+                    </li>
+                    <li>
+                        <span class="log-year">2020</span>
+                        <span class="log-text">一事无成</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 留言联系 -->
+        <section class="panel" id="links">
+            <div class="panel-head">
+                <h2 class="panel-title" data-kw="lylx liuyan lianxi 留言 联系 咨询 反馈">留言联系</h2>
+                <a href="mailto:xtn@vip.qq.com" class="panel-more">更多 &gt;&gt;</a>
+            </div>
+            <div class="panel-body">
+                <div class="interact">
+                    <div class="interact-col">
+                        <h4 class="interact-title" data-kw="yjzj 意见 建议 想法 反馈">意见建议</h4>
+                        <p class="interact-text">欢迎对本站内容、功能提出意见建议。我们将在收到后尽快处理并予以回复。</p>
+                        <a href="mailto:xtn@vip.qq.com?subject=意见建议" class="btn btn-primary">提交意见建议</a>
+                    </div>
+                    <div class="interact-col">
+                        <h4 class="interact-title" data-kw="zxly 咨询 留言 提问 联系">留言咨询</h4>
+                        <p class="interact-text">如需技术咨询、项目合作或问题反馈，请通过以下方式联系本站。</p>
+                        <a href="mailto:xtn@vip.qq.com?subject=留言咨询" class="btn">进入留言咨询</a>
+                    </div>
+                    <div class="interact-col">
+                        <h4 class="interact-title" data-kw="nrjc 纠错 错误 报告 反馈">页面纠错</h4>
+                        <p class="interact-text">发现页面信息有误或链接失效？欢迎第一时间告知我们，感谢支持。</p>
+                        <a href="mailto:xtn@vip.qq.com?subject=页面纠错" class="btn">提交纠错反馈</a>
+                    </div>
+                </div>
+                <div class="friendlink-block">
+                    <div class="friendlink-title">友情链接</div>
+                    <div class="friendlinks">
+                        <a href="https://github.com/xtnu" target="_blank">GitHub</a>
+                        <a href="mailto:xtn@vip.qq.com">邮箱联系</a>
+                        <a href="https://blog.521567.xyz/" target="_blank">个人博客</a>
+                        <a href="https://api.521567.xyz/" target="_blank">接口服务</a>
+                        <a href="https://whois.521567.xyz/" target="_blank">Whois 查询</a>
+                        <a href="https://mdjs.js.org/" target="_blank">MdJs 文档</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="footer-nav">
+                <a href="#about">个人概况</a><span class="sep">|</span>
+                <a href="#apps">工具服务</a><span class="sep">|</span>
+                <a href="#projects">项目展示</a><span class="sep">|</span>
+                <a href="#timeline">成长历程</a><span class="sep">|</span>
+                <a href="mailto:xtn@vip.qq.com">内容纠错</a>
+            </div>
+            <div class="footer-info">
+                <p>页面维护：夏透喃　|　内容编辑：Xtn　|　技术支持：Xtn　|　联系方式：<a href="mailto:xtn@vip.qq.com">xtn@vip.qq.com</a></p>
+                <p data-kw="beian 备案 备案号 icp 萌ICP 页面编号">
+                    <a href="https://icp.gov.moe/?keyword=20268999" target="_blank">萌ICP 备 20268999 号</a>
+                    <span class="sep">|</span>
+                    <a href="https://icp.gov.moe/?keyword=20256661" target="_blank">萌ICP 备 20256661 号</a>
+                    <span class="sep">|</span>
+                    <span>页面编号：XTN-2026-0001</span>
+                </p>
+                <p class="footer-tip">本站为个人技术主页，非官方机构网站，页面风格仅用于学习交流与设计参考。</p>
+                <p class="footer-tip">建议使用 1440×900 及以上分辨率、Chrome / Edge 浏览器访问以获得最佳体验。本站已适配移动端浏览。</p>
+            </div>
+            <div class="footer-copyright">Xtn © 2025　版权所有　|　未经许可不得转载　|　本页面最后更新时间：2026-08-28</div>
+        </div>
+    </footer>
+
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" data-action="about">
+            <span class="context-menu-line"></span>
+            <span>个人档案</span>
+        </div>
+        <div class="context-menu-item" data-action="projects">
+            <span class="context-menu-line"></span>
+            <span>项目展示</span>
+        </div>
+        <div class="context-menu-item" data-action="timeline">
+            <span class="context-menu-line"></span>
+            <span>成长历程</span>
+        </div>
+        <div class="context-menu-item" data-action="settings">
+            <span class="context-menu-line"></span>
+            <span>显示设置</span>
+        </div>
+    </div>
+
+    <div class="back-to-top" id="backToTop" title="返回顶部">
+        <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M512 384L256 640h512L512 384z" fill="currentColor"></path></svg>
+    </div>
+
+    <script src="./static/js/main.js"></script>
+    <script>
+        (function () {
+            // 顶部日期：站点常用的"年月日 星期"
+            var d = new Date();
+            var weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            var el = document.getElementById('govDate');
+            if (el) {
+                el.textContent = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日　' + weeks[d.getDay()];
+            }
+
+            // 无障碍字号调节：A- / A / A+
+            var html = document.documentElement;
+            var savedFont = null;
+            try { savedFont = localStorage.getItem('xtnFontScale'); } catch (e) {}
+            if (savedFont) { html.setAttribute('data-font', savedFont); }
+
+            function setFont(scale) {
+                if (scale === 'normal') { html.removeAttribute('data-font'); }
+                else { html.setAttribute('data-font', scale); }
+                try {
+                    if (scale === 'normal') localStorage.removeItem('xtnFontScale');
+                    else localStorage.setItem('xtnFontScale', scale);
+                } catch (e) {}
+            }
+
+            var fs = document.getElementById('fontSmall');
+            var fn = document.getElementById('fontNormal');
+            var fl = document.getElementById('fontLarge');
+            if (fs) fs.onclick = function () { setFont('small'); };
+            if (fn) fn.onclick = function () { setFont('normal'); };
+            if (fl) fl.onclick = function () { setFont('large'); };
+
+            // 高对比度
+            var cb = document.getElementById('contrastBtn');
+            var savedContrast = null;
+            try { savedContrast = localStorage.getItem('xtnContrast'); } catch (e) {}
+            if (savedContrast === 'high') {
+                html.setAttribute('data-contrast', 'high');
+                if (cb) { cb.classList.add('on'); cb.textContent = '恢复常规'; }
+            }
+            if (cb) {
+                cb.onclick = function () {
+                    if (html.getAttribute('data-contrast') === 'high') {
+                        html.removeAttribute('data-contrast');
+                        cb.classList.remove('on');
+                        cb.textContent = '高对比度';
+                        try { localStorage.removeItem('xtnContrast'); } catch (e) {}
+                    } else {
+                        html.setAttribute('data-contrast', 'high');
+                        cb.classList.add('on');
+                        cb.textContent = '恢复常规';
+                        try { localStorage.setItem('xtnContrast', 'high'); } catch (e) {}
+                    }
+                };
+            }
+
+            // 打印本页
+            var pb = document.getElementById('printBtn');
+            if (pb) pb.onclick = function () { window.print(); };
+        })();
+
+        // =====================================================
+        // 站内实时搜索：索引本页内容 + 模糊匹配 + 快速跳转
+        // =====================================================
+        (function () {
+            var box = document.getElementById('siteSearch');
+            var input = document.getElementById('searchInput');
+            var panel = document.getElementById('searchPanel');
+            var btn = document.getElementById('searchBtn');
+            if (!box || !input || !panel) return;
+
+            // --- 1. 构建页面内容索引 ---
+            var RULES = [
+                { sel: '.panel-title',    type: '栏目' },
+                { sel: '.profile-name',   type: '简介' },
+                { sel: '.newslist li a',  type: '动态' },
+                {
+                    sel: '.datatable tbody tr', type: '项目',
+                    get: function (el) {
+                        var c = el.querySelector('td');
+                        var d = el.querySelectorAll('td')[1];
+                        return c ? (c.textContent + (d ? '　' + d.textContent : '')) : '';
+                    }
+                },
+                {
+                    sel: '.servlist li', type: '工具',
+                    get: function (el) {
+                        var n = el.querySelector('.serv-name');
+                        var d = el.querySelector('.serv-desc');
+                        return n ? (n.textContent + (d ? '　' + d.textContent : '')) : '';
+                    }
+                },
+                {
+                    sel: '.loglist li', type: '历程',
+                    get: function (el) {
+                        var y = el.querySelector('.log-year');
+                        var t = el.querySelector('.log-text');
+                        return ((y ? y.textContent : '') + '年 ' + (t ? t.textContent : '')).replace('年年', '年');
+                    }
+                },
+                { sel: '.infotable tr',   type: '档案' },
+                { sel: '.statustag',      type: '状态' },
+                {
+                    sel: '.interact-col', type: '联系',
+                    get: function (el) {
+                        var t = el.querySelector('.interact-title');
+                        return t ? t.textContent : '';
+                    }
+                },
+                { sel: '.friendlinks a',  type: '链接' },
+                { sel: '.site-footer p',  type: '页脚' },
+                { sel: '.footer-nav',     type: '页脚' },
+                { sel: '.footer-copyright', type: '页脚' }
+            ];
+
+            function clean(s) {
+                return (s || '').replace(/\s+/g, ' ').trim();
+            }
+
+            var index = [];
+            RULES.forEach(function (rule) {
+                var nodes = document.querySelectorAll(rule.sel);
+                for (var i = 0; i < nodes.length; i++) {
+                    var el = nodes[i];
+                    var title = clean(rule.get ? rule.get(el) : el.textContent);
+                    if (!title) continue;
+                    // 信息档案类文本过长时截断展示
+                    if (title.length > 60) title = title.slice(0, 60) + '…';
+                    var host = el.closest ? el.closest('.panel') : null;
+                    var head = host ? host.querySelector('.panel-title') : null;
+                    index.push({
+                        title: title,
+                        type: rule.type,
+                        group: head ? clean(head.textContent) : '',
+                        kw: clean(el.getAttribute('data-kw') || ''),
+                        el: el
+                    });
+                }
+            });
+
+            // --- 2. 模糊匹配打分 ---
+            function subseq(text, q) {
+                var ti = 0, last = -1, gaps = 0;
+                for (var i = 0; i < q.length; i++) {
+                    var c = q.charAt(i);
+                    if (c === ' ') continue;
+                    var p = text.indexOf(c, ti);
+                    if (p === -1) return null;
+                    if (last !== -1) gaps += p - last - 1;
+                    last = p;
+                    ti = p + 1;
+                }
+                return gaps;
+            }
+
+            function scoreItem(it, q) {
+                var title = it.title.toLowerCase();
+                var meta = (it.kw + ' ' + it.group + ' ' + it.type).toLowerCase();
+                var all = (it.title + ' ' + meta).toLowerCase();
+
+                if (title === q) return 100000;                       // 完全一致
+                if (title.indexOf(q) === 0) return 80000 - title.length; // 前缀
+                var i = title.indexOf(q);
+                if (i !== -1) return 60000 - i * 10;                  // 标题包含
+                if (meta.indexOf(q) !== -1) return 40000;             // 别名/栏目命中
+                if (all.indexOf(q) !== -1) return 20000;              // 全字段包含
+                var g1 = subseq(title, q);
+                if (g1 !== null) return 10000 - g1 * 20;              // 标题模糊
+                var g2 = subseq(all, q);
+                if (g2 !== null) return 5000 - g2 * 20;               // 全字段模糊
+                return 0;
+            }
+
+            function search(q) {
+                var out = [];
+                for (var i = 0; i < index.length; i++) {
+                    var s = scoreItem(index[i], q);
+                    if (s > 0) out.push({ item: index[i], score: s });
+                }
+                out.sort(function (a, b) { return b.score - a.score; });
+                // 同标题去重
+                var seen = {}, res = [];
+                for (var j = 0; j < out.length; j++) {
+                    var t = out[j].item.title;
+                    if (!seen[t]) { seen[t] = 1; res.push(out[j].item); }
+                }
+                return res;
+            }
+
+            // --- 3. 渲染结果 ---
+            var results = [];
+            var active = -1;
+            var timer = null;
+
+            function esc(s) {
+                return String(s).replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+
+            function highlight(text, q) {
+                var i = text.toLowerCase().indexOf(q.toLowerCase());
+                if (i === -1) return esc(text);
+                return esc(text.slice(0, i)) + '<em>' + esc(text.slice(i, i + q.length)) +
+                       '</em>' + esc(text.slice(i + q.length));
+            }
+
+            function show() { box.classList.add('open'); }
+            function hide() { box.classList.remove('open'); active = -1; }
+
+            function render(list, q) {
+                if (!list.length) {
+                    panel.innerHTML = '<div class="search-empty">未找到与“' + esc(q) + '”相关的内容，请尝试其他关键词</div>';
+                    show();
+                    return;
+                }
+                var showList = list.slice(0, 10);
+                var html = showList.map(function (it, i) {
+                    return '<div class="search-item' + (i === active ? ' active' : '') + '" data-i="' + i + '">' +
+                           '<span class="search-item-type">' + esc(it.type) + '</span>' +
+                           '<span class="search-item-title">' + highlight(it.title, q) + '</span>' +
+                           (it.group ? '<span class="search-item-group">' + esc(it.group) + '</span>' : '') +
+                           '</div>';
+                }).join('');
+                panel.innerHTML = html +
+                    '<div class="search-foot">共匹配 ' + list.length + ' 条　↑↓ 选择　Enter 跳转　Esc 关闭</div>';
+                show();
+            }
+
+            function run(force) {
+                var q = input.value.trim();
+                if (!q) { hide(); results = []; return; }
+                results = search(q.toLowerCase());
+                active = results.length ? 0 : -1;
+                render(results, q);
+                if (force && results.length) go(0);
+            }
+
+            function go(i) {
+                var it = results[i];
+                if (!it) return;
+                hide();
+                var el = it.el;
+                try {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } catch (e) {
+                    el.scrollIntoView();
+                }
+                el.classList.remove('search-hit');
+                // 触发重排以保证动画可重复播放
+                void el.offsetWidth;
+                el.classList.add('search-hit');
+                setTimeout(function () { el.classList.remove('search-hit'); }, 2400);
+            }
+
+            // 输入即搜（轻量防抖）
+            input.addEventListener('input', function () {
+                clearTimeout(timer);
+                timer = setTimeout(function () { run(false); }, 60);
+            });
+
+            input.addEventListener('focus', function () {
+                if (input.value.trim()) run(false);
+            });
+
+            // 键盘导航
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowDown') {
+                    if (!results.length) return;
+                    active = (active + 1) % results.length;
+                    render(results, input.value.trim());
+                    e.preventDefault();
+                } else if (e.key === 'ArrowUp') {
+                    if (!results.length) return;
+                    active = (active - 1 + results.length) % results.length;
+                    render(results, input.value.trim());
+                    e.preventDefault();
+                } else if (e.key === 'Enter') {
+                    if (results.length) go(active >= 0 ? active : 0);
+                    e.preventDefault();
+                } else if (e.key === 'Escape') {
+                    hide();
+                    input.blur();
+                }
+            });
+
+            // 结果点击（事件委托）
+            panel.addEventListener('mousedown', function (e) {
+                var node = e.target.closest ? e.target.closest('.search-item') : null;
+                if (!node) return;
+                e.preventDefault();
+                go(parseInt(node.getAttribute('data-i'), 10));
+            });
+
+            // 搜索按钮：有结果跳首条，无输入则聚焦
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    if (!input.value.trim()) { input.focus(); return; }
+                    run(true);
+                });
+            }
+
+            // 点击页面其他位置关闭
+            document.addEventListener('click', function (e) {
+                if (!box.contains(e.target)) hide();
+            });
+        })();
+    </script>
+</body>
+
+</html>
