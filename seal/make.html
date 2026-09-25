@@ -114,16 +114,45 @@
   <div class="sec">二、实时预览</div>
   <div class="preview-box" id="preview"><span style="color:#8a8676;font-size:13px;letter-spacing:.2em">（填写后此处出章）</span></div>
 
-  <div class="sec">三、获取引入代码</div>
+  <div class="sec">三、摆放位置与获取代码</div>
+  <div class="grid">
+    <div class="field">
+      <label>摆放位置</label>
+      <select id="f-pos">
+        <optgroup label="嵌入页面 · 随页面滚动">
+          <option value="inline">跟随代码位置（默认）</option>
+          <option value="top">页面顶部（页首）</option>
+          <option value="bottom">页面底部（页脚，滑到底可见）</option>
+        </optgroup>
+        <optgroup label="悬浮屏幕 · 固定不随滚动">
+          <option value="float-br">悬浮 · 右下角（推荐）</option>
+          <option value="float-bl">悬浮 · 左下角</option>
+          <option value="float-tr">悬浮 · 右上角</option>
+          <option value="float-tl">悬浮 · 左上角</option>
+          <option value="float-bc">悬浮 · 底部居中</option>
+          <option value="float-tc">悬浮 · 顶部居中</option>
+          <option value="float-ml">悬浮 · 左侧居中</option>
+          <option value="float-mr">悬浮 · 右侧居中</option>
+          <option value="float-center">悬浮 · 屏幕正中</option>
+        </optgroup>
+      </select>
+      <div class="tip">悬浮模式印章会固定在访客屏幕对应位置，不随页面滚动，并自带纸底衬托；嵌入与页面顶部/底部则跟随页面内容滚动。</div>
+    </div>
+    <div class="field">
+      <label>印章大小（像素）</label>
+      <input id="f-size" inputmode="numeric" placeholder="默认：悬浮 110 / 嵌入 160">
+      <div class="tip">留空即用智能默认，也可稍后在代码里改 data-size。</div>
+    </div>
+  </div>
   <button class="btn" id="btn-gen">生 成 引 入 代 码</button>
   <div class="result" id="result">
     <div style="font-size:13px;color:#5a564c;margin:14px 0 6px;letter-spacing:.1em">将下面这行代码粘贴到你网页的任意位置（&lt;body&gt; 内）：</div>
     <textarea class="code" id="out-code" readonly></textarea>
     <button class="btn small" id="btn-copy">复 制 代 码</button>
     <div class="ok-note">
-      使用说明：<b>①</b> 代码可放在网页任意位置，印章会显示在代码插入处；
-      想指定位置可在生成后自行给外层套一个容器。<b>②</b> 本平台不保存任何数据，
-      印章信息全部包含在这行代码里，请自行留档。<b>③</b> 别人查看你的源代码也能
+      使用说明：<b>①</b> 「摆放位置」按需选择——嵌入模式印章显示在代码插入处；页面顶部/底部会自动放到页首或页脚；
+      悬浮模式固定在访客屏幕上不随滚动。位置与大小以后也能在代码里改 <b>data-pos</b> / <b>data-size</b> 属性。
+      <b>②</b> 本平台不保存任何数据，印章信息全部包含在这行代码里，请自行留档。<b>③</b> 别人查看你的源代码也能
       看到并修改这些信息——本平台定位娱乐，不设加密，验证以
       <a href="check.html" style="color:#b3272d" target="_blank">验证页</a>为准。
     </div>
@@ -220,7 +249,12 @@
 
     var js = $("f-jsurl").value.trim() || DEFAULT_JS;
     var str = SP.b64e(JSON.stringify(d));
-    $("out-code").value = '<script src="' + js + '" data-seal="' + str + '"><\/script>';
+    var pos = $("f-pos").value;
+    var size = parseInt($("f-size").value, 10);
+    var attrs = 'src="' + js + '" data-seal="' + str + '"';
+    if (pos && pos !== "inline") attrs += ' data-pos="' + pos + '"';
+    if (size > 0) attrs += ' data-size="' + size + '"';
+    $("out-code").value = "<script " + attrs + "><\/script>";
     $("result").style.display = "block";
     $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
   });

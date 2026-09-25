@@ -1,13 +1,22 @@
 /*!
- * 印章平台 seal.js v1.2 —— 零后端、零存储的网页印章
+ * 印章平台 seal.js v1.3 —— 零后端、零存储的网页印章
  *
  * 用法（在网页任意位置插入一行）：
  *   <script src="https://www.521567.xyz/seal/seal.js" data-seal="BASE64数据串"></script>
  *   <script src="..." data-seals='["B64","B64"]'></script>          多章
  *   <script src="..." data-seal="B64" data-target="#box"></script>  指定容器
  *   <script src="..." data-seal="B64" data-size="140"></script>     自定义大小
+ *   <script src="..." data-seal="B64" data-pos="float-br"></script> 摆放位置
  *
- * 可选属性：data-verify="验证页URL"  data-size="像素"
+ * 摆放位置 data-pos（不填 = inline 跟随代码位置）：
+ *   嵌入页面（随页面滚动）：inline 跟随代码位置 | top 页面顶部 | bottom 页面底部(页脚)
+ *   悬浮屏幕（固定不随滚动）：float-br 右下(默认悬浮) | float-bl 左下 | float-tr 右上
+ *     | float-tl 左上 | float-bc 底部居中 | float-tc 顶部居中 | float-ml 左侧居中
+ *     | float-mr 右侧居中 | float-center 屏幕正中
+ *   支持简写别名：rb/br、bl/lb、tr/rt、tl/lt、bc、tc、ml、mr、center/middle、
+ *     top/head/page-top、bottom/foot/footer/page-bottom、inline/default/flow，
+ *     大小写、空格、下划线均可（如 "Right_Bottom" → float-br）
+ * 可选属性：data-verify="验证页URL"  data-size="像素"（悬浮默认110 / 嵌入默认160）
  * 验证页默认取「本文件所在目录下的 check.html」，与 seal.js 同目录即可，无需配置。
  *
  * 印章数据字段：n=单位名称 d=绑定域名(|分隔) i=编号 t=签发时间 e=过期时间(0永久)
@@ -77,6 +86,41 @@
     if (!matchDomain(data.d, host)) return "mismatch";
     if (data.e && Date.now() > data.e) return "expired";
     return "valid";
+  }
+
+  /* ---------- 摆放位置 ---------- */
+  var FLOAT_POS = {
+    "float-br": 1, "float-bl": 1, "float-tr": 1, "float-tl": 1,
+    "float-bc": 1, "float-tc": 1, "float-ml": 1, "float-mr": 1, "float-center": 1
+  };
+  var POS_ALIAS = {
+    "rb": "float-br", "br": "float-br", "right-bottom": "float-br", "bottom-right": "float-br",
+    "bl": "float-bl", "lb": "float-bl", "left-bottom": "float-bl", "bottom-left": "float-bl",
+    "tr": "float-tr", "rt": "float-tr", "right-top": "float-tr", "top-right": "float-tr",
+    "tl": "float-tl", "lt": "float-tl", "left-top": "float-tl", "top-left": "float-tl",
+    "bc": "float-bc", "bottom-center": "float-bc",
+    "tc": "float-tc", "top-center": "float-tc",
+    "ml": "float-ml", "lm": "float-ml", "left-middle": "float-ml", "middle-left": "float-ml",
+    "mr": "float-mr", "rm": "float-mr", "right-middle": "float-mr", "middle-right": "float-mr",
+    "mc": "float-center", "center": "float-center", "middle": "float-center",
+    "screen-center": "float-center", "screen": "float-center",
+    "inline": "inline", "default": "inline", "flow": "inline", "embed": "inline",
+    "top": "top", "head": "top", "page-top": "top",
+    "bottom": "bottom", "foot": "bottom", "footer": "bottom", "page-bottom": "bottom"
+  };
+  function normalizePos(raw) {
+    var s = String(raw == null ? "" : raw).trim().toLowerCase().replace(/[\s_]+/g, "-");
+    if (!s) return "inline";
+    if (FLOAT_POS[s] || s === "inline" || s === "top" || s === "bottom") return s;
+    return POS_ALIAS[s] || null;
+  }
+  /* 把章挂到页面上的对应位置 */
+  function place(el, wrap, pos) {
+    var b = document.body;
+    if (!b || !el || !pos || pos === "inline") return;
+    if (pos === "top") b.insertBefore(el, b.firstChild);
+    else b.appendChild(el);                          /* bottom 与所有悬浮位 */
+    if (FLOAT_POS[pos] && wrap) wrap.classList.add("sp-float", "sp-" + pos);
   }
 
   /* ---------- 中心图案库（娱乐向，避开官方徽标元素） ---------- */
@@ -190,7 +234,20 @@
     ".sp-seal.sp-off svg{filter:grayscale(.9);opacity:.65}" +
     '.sp-seal-link{position:absolute;right:2px;bottom:2px;font:10px/1.4 "Microsoft YaHei",sans-serif;' +
     "color:#b3272d;text-decoration:none;opacity:.55;letter-spacing:1px;transition:opacity .2s}" +
-    ".sp-seal-link:hover{opacity:1}";
+    ".sp-seal-link:hover{opacity:1}" +
+    /* 悬浮模式：固定在屏幕对应位置，垫一层纸底保证任何网页上都清晰 */
+    ".sp-float{position:fixed;z-index:2147483000;background:rgba(250,247,238,.94);" +
+    "border:1px solid rgba(179,39,45,.28);border-radius:4px;padding:6px;" +
+    "box-shadow:0 4px 18px rgba(0,0,0,.18)}" +
+    ".sp-float-br{right:16px;bottom:16px}" +
+    ".sp-float-bl{left:16px;bottom:16px}" +
+    ".sp-float-tr{right:16px;top:16px}" +
+    ".sp-float-tl{left:16px;top:16px}" +
+    ".sp-float-bc{left:50%;bottom:16px;transform:translateX(-50%)}" +
+    ".sp-float-tc{left:50%;top:16px;transform:translateX(-50%)}" +
+    ".sp-float-ml{left:16px;top:50%;transform:translateY(-50%)}" +
+    ".sp-float-mr{right:16px;top:50%;transform:translateY(-50%)}" +
+    ".sp-float-center{left:50%;top:50%;transform:translate(-50%,-50%)}";
   document.head.appendChild(css);
 
   /* ---------- 挂载（对外 API 与自动初始化共用） ---------- */
@@ -205,7 +262,17 @@
     var host = "host" in opts ? opts.host
       : (location.protocol === "file:" ? null : location.hostname);
     var st = status(data, host);
-    var size = opts.size || 160;
+
+    /* 位置：仅在显式传入 opts.pos 时接管摆放（inline/top/bottom/float-*） */
+    var pos = null;
+    if ("pos" in opts) {
+      pos = normalizePos(opts.pos);
+      if (!pos) {
+        pos = "inline";
+        if (window.console) console.warn('[seal] 未知摆放位置 "' + opts.pos + '"，已按 inline 处理');
+      }
+    }
+    var size = opts.size || (pos && FLOAT_POS[pos] ? 110 : 160);
     var str = typeof sealStr === "string" ? sealStr : b64e(JSON.stringify(data));
 
     var wrap = document.createElement("div");
@@ -223,6 +290,7 @@
 
     el.innerHTML = "";
     el.appendChild(wrap);
+    if (pos) place(el, wrap, pos);
     return { data: data, status: st, el: el };
   }
 
@@ -245,21 +313,20 @@
       }
       if (tag.dataset.seal) list.push(tag.dataset.seal);
 
-      var size = parseInt(tag.dataset.size, 10) || 160;
+      var size = parseInt(tag.dataset.size, 10) || 0;   /* 0 = 交给 mount 智能默认 */
+      var pos = tag.dataset.pos || "inline";            /* 原始值交给 mount 统一归一化+告警 */
       var target = tag.dataset.target ? document.querySelector(tag.dataset.target) : null;
 
       list.forEach(function (s) {
-        var holder = target;
-        if (!holder) {
-          holder = document.createElement("div");
-          var pn = tag.parentNode;
-          if (pn && pn.nodeName !== "HEAD" && pn.nodeName !== "HTML") {
-            pn.insertBefore(holder, tag.nextSibling);
-          } else if (document.body) {
-            document.body.appendChild(holder);
-          }
+        if (target) { mount(target, s, { size: size }); return; }
+        var holder = document.createElement("div");
+        var pn = tag.parentNode;
+        if (pn && pn.nodeName !== "HEAD" && pn.nodeName !== "HTML") {
+          pn.insertBefore(holder, tag.nextSibling);
+        } else if (document.body) {
+          document.body.appendChild(holder);
         }
-        mount(holder, s, { size: size });
+        mount(holder, s, { size: size, pos: pos });
       });
     }
   }
@@ -272,13 +339,14 @@
 
   /* ---------- 对外 API ---------- */
   window.SealPlatform = {
-    version: "1.2",
+    version: "1.3",
     base: DEFAULT_BASE,
     src: _script && _script.src ? new URL(_script.src, location.href).href : "",
     verify: VERIFY,
     parse: parse, b64e: b64e, b64d: b64d,
     matchDomain: matchDomain, status: status,
     styleNames: STYLE_NAMES,
+    normalizePos: normalizePos,
     mount: mount, renderSVG: renderSVG
   };
 })();
