@@ -38,6 +38,18 @@
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:560px){.grid{grid-template-columns:1fr}}
 
+  /* 验真入口开关 */
+  .switch-line{display:flex;align-items:center;gap:9px;font-size:14.5px;
+    color:#26241f;cursor:pointer;letter-spacing:.05em;user-select:none}
+  .switch-line input{position:absolute;width:auto;opacity:0;pointer-events:none}
+  .switch-line .sw{flex:0 0 auto;width:36px;height:19px;border:1px solid #8a8676;
+    background:#fff;position:relative;transition:background .2s,border-color .2s}
+  .switch-line .sw::after{content:"";position:absolute;left:2px;top:2px;width:13px;height:13px;
+    background:#8a8676;transition:left .2s,background .2s}
+  .switch-line input:checked ~ .sw{background:#b3272d;border-color:#b3272d}
+  .switch-line input:checked ~ .sw::after{left:19px;background:#faf7ee}
+  .switch-line input:focus-visible ~ .sw{outline:2px solid #b3272d;outline-offset:2px}
+
   .preview-box{
     border:1px dashed #8a8676;padding:24px;text-align:center;
     background:rgba(255,255,255,.4);min-height:200px;
@@ -115,6 +127,10 @@
     <label>隐藏留言（可选，仅验证页可见的彩蛋）</label>
     <input id="f-msg" maxlength="60" placeholder="例：本站由一只猫代为运营，出事找猫。">
   </div>
+  <div class="field">
+    <label class="switch-line"><input type="checkbox" id="f-verify"><span class="sw"></span>开启「验真」角标入口（默认关闭）</label>
+    <div class="tip">开启后印章右下角显示可点击的小「验真」角标，点击直达验证页。默认关闭以保持章面纯净：印章尺寸较小时，角标会显得偏大、位置偏挤。关闭不影响验真——验证页链接始终可用，可单独分享给访客。</div>
+  </div>
 
   <div class="sec">二、实时预览</div>
   <div class="preview-box" id="preview"><span style="color:#8a8676;font-size:13px;letter-spacing:.2em">（填写后此处出章）</span></div>
@@ -141,7 +157,7 @@
           <option value="float-center">悬浮 · 屏幕正中</option>
         </optgroup>
       </select>
-      <div class="tip">悬浮模式印章会固定在访客屏幕对应位置，不随页面滚动；无底色纯章显示，点击可穿透印章直接点到底下的按钮或链接，仅右下角小"验真"角标可点。嵌入与页面顶部/底部则跟随页面内容滚动。</div>
+      <div class="tip">悬浮模式印章会固定在访客屏幕对应位置，不随页面滚动；无底色纯章显示，点击可穿透印章直接点到底下的按钮或链接（若开启「验真」角标，仅该小角标可点）。嵌入与页面顶部/底部则跟随页面内容滚动。</div>
     </div>
     <div class="field">
       <label>印章大小（像素）</label>
@@ -205,20 +221,55 @@
     });
   }
 
-  /* 部署地址：先填默认值，再让部署后的自动探测覆盖 */
-  $("f-jsurl").value = DEFAULT_JS;
-  $("f-verifyurl").value = DEFAULT_VERIFY;
-  if (SP && SP.src && /^https?:/i.test(SP.src)) {
-    $("f-jsurl").value = SP.src;
-    $("f-verifyurl").value = SP.verify;
+  /* ---------- 本地暂存：刷新或重访都保留上次填写内容 ---------- */
+  var LS_KEY = "seal-make-v1";
+  var FIELDS = ["f-name","f-domain","f-style","f-cap","f-exp","f-msg",
+                "f-pos","f-size","f-jsurl","f-verifyurl"];
+  function loadSaved(){
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; }
+    catch(e){ return {}; }
+  }
+  function saveForm(){
+    try {
+      var o = { theme: theme, code: $("out-code").value || "",
+                result: $("result").style.display === "block" ? "1" : "0" };
+      FIELDS.forEach(function(id){ o[id] = $(id).value; });
+      o["f-verify"] = $("f-verify").checked ? "1" : "0";
+      localStorage.setItem(LS_KEY, JSON.stringify(o));
+    } catch(e){}
+  }
+  var saved = loadSaved();
+
+  /* 1) 先恢复上次的填写 */
+  FIELDS.forEach(function(id){
+    if (typeof saved[id] === "string" && saved[id] !== "") $(id).value = saved[id];
+  });
+  if (saved["f-verify"] === "1") $("f-verify").checked = true;
+  if (saved.theme === "dark" || saved.theme === "light") theme = saved.theme;
+
+  /* 2) 部署地址：上次改过就原样保留；从未存过才填默认值，
+        并允许部署后的自动探测覆盖（避免探测冲掉用户手动修改） */
+  if (typeof saved["f-jsurl"] !== "string" || !saved["f-jsurl"]) {
+    $("f-jsurl").value = DEFAULT_JS;
+    $("f-verifyurl").value = DEFAULT_VERIFY;
+    if (SP && SP.src && /^https?:/i.test(SP.src)) {
+      $("f-jsurl").value = SP.src;
+      $("f-verifyurl").value = SP.verify;
+    }
   }
   if (!SP) {
     $("preview").innerHTML =
       '<span style="color:#b3272d;font-size:13px">渲染器 seal.js 加载失败：请确认 seal.js 与本页面在同一目录，且文件内没有包 &lt;script&gt; 标签，然后刷新。</span>';
   }
 
+  /* 3) 恢复上次生成的引入代码（误刷新也不用重新点生成） */
+  if (saved.code && saved.result === "1") {
+    $("out-code").value = saved.code;
+    $("result").style.display = "block";
+  }
+
   function collect(){
-    return {
+    var d = {
       n: $("f-name").value.trim(),
       d: $("f-domain").value.trim(),
       i: (crypto.randomUUID ? crypto.randomUUID().replace(/-/g,"").slice(0,8) : String(Date.now()).slice(-8)),
@@ -228,6 +279,8 @@
       s: $("f-cap").value.trim() || "网络专用",
       st: $("f-style").value
     };
+    if ($("f-verify").checked) d.v = 1;   /* 验真角标默认关闭，勾选才写入 */
+    return d;
   }
 
   /* 拼装引入代码（生成与跟随预览共用） */
@@ -301,7 +354,7 @@
       "<p>占位段落三，模拟正常网页的排版长度。</p>" +
       '<div class="foot">© 山间小筑 · 这里是页脚（bottom 位置的印章会出现在这一带）</div>' +
       "</div>" +
-      (tag ? tag + HOST_OVERRIDE : "") +
+      (tag ? HOST_OVERRIDE : "") +
       "<scr" + "ipt>var n=0,b=document.getElementById('pv-btn');" +
       "if(b)b.addEventListener('click',function(){n++;document.getElementById('pv-n').textContent='—— 按钮已被点击 '+n+' 次，印章没有挡住我';});<\/scr" + "ipt>" +
       "</body></html>";
@@ -324,9 +377,15 @@
       updateLive();
     }, 250);
   }
-  ["f-name","f-domain","f-cap","f-msg","f-exp","f-style","f-pos","f-size"].forEach(function(id){
+  ["f-name","f-domain","f-cap","f-msg","f-exp","f-style","f-pos","f-size","f-verify"].forEach(function(id){
     $(id).addEventListener("input", refresh);
     $(id).addEventListener("change", refresh);
+  });
+  /* 所有改动（含部署地址）同步写入本地暂存 */
+  ["f-name","f-domain","f-cap","f-msg","f-exp","f-style","f-pos","f-size",
+   "f-verify","f-jsurl","f-verifyurl"].forEach(function(id){
+    $(id).addEventListener("input", saveForm);
+    $(id).addEventListener("change", saveForm);
   });
 
   /* 主题切换 */
@@ -335,6 +394,7 @@
     $("theme-light").className = "theme-btn" + (t === "light" ? " on" : "");
     $("theme-dark").className = "theme-btn" + (t === "dark" ? " on" : "");
     updateLive();
+    saveForm();
   }
   $("theme-light").addEventListener("click", function(){ setTheme("light"); });
   $("theme-dark").addEventListener("click", function(){ setTheme("dark"); });
@@ -350,6 +410,7 @@
     var js = $("f-jsurl").value.trim() || DEFAULT_JS;
     $("out-code").value = scriptTag(js, SP.b64e(JSON.stringify(d)));
     $("result").style.display = "block";
+    saveForm();
     $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 
@@ -376,8 +437,9 @@
     }
   });
 
-  /* 初始渲染一次网页效果预览 */
-  updateLive();
+  /* 初始渲染：按恢复的主题（含暂存）刷一次跟随预览，并补画固定章面预览 */
+  setTheme(theme);
+  facePreview();
 })();
 </script>
 </body>

@@ -55,13 +55,13 @@
   <div class="steps">
     <div class="step"><h3>① 生成</h3><p>打开生成页，填写单位名称和你的域名，实时预览，一键复制引入代码。</p></div>
     <div class="step"><h3>② 嵌入</h3><p>把那行 &lt;script&gt; 粘贴进网页，印章当场生效。可选悬浮在屏幕四角、居中或嵌入页面顶部/底部，离开你的域名会自动失效。</p></div>
-    <div class="step"><h3>③ 验真</h3><p>点击印章上的「验真」角标，或在本站输入域名查验印章信息与隐藏留言。</p></div>
+    <div class="step"><h3>③ 验真</h3><p>在本站输入域名即可查验印章信息与隐藏留言；生成时若开启了「验真」角标，也可直接点击章上角标跳转验证页。</p></div>
   </div>
 
   <a class="go" href="make.html">生成我的印章</a>
   <a class="go ghost" href="check.html">查验一枚印章</a>
 
-  <footer>印章即验证入口 · 复制即传播 · 娱乐用途，不构成任何法律效力</footer>
+  <footer>验真以验证页为准 · 复制即传播 · 娱乐用途，不构成任何法律效力</footer>
 </div>
 
 <script src="seal.js"></script>
@@ -71,7 +71,7 @@
   if (!SP) return;
   var demo = {
     n: "印章平台演示专用章", d: "demo.local", i: "DEMO0001",
-    t: Date.now(), e: 0, s: "示例专用", st: "paw",
+    t: Date.now(), e: 0, s: "示例专用", st: "paw", v: 1,
     m: "这是隐藏留言彩蛋——去验证页就能看到这行字。"
   };
   SP.mount(document.getElementById("demo"), demo, { host: "demo.local", size: 180 });

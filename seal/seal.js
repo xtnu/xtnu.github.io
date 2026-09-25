@@ -1,5 +1,5 @@
 /*!
- * 印章平台 seal.js v1.4 —— 零后端、零存储的网页印章
+ * 印章平台 seal.js v1.5 —— 零后端、零存储的网页印章
  *
  * 用法（在网页任意位置插入一行）：
  *   <script src="https://www.521567.xyz/seal/seal.js" data-seal="BASE64数据串"></script>
@@ -21,6 +21,8 @@
  *
  * 印章数据字段：n=单位名称 d=绑定域名(|分隔) i=编号 t=签发时间 e=过期时间(0永久)
  *               m=隐藏留言 s=章面下标文字 st=样式(official/paw/smile/bolt/heart)
+ *               v=验真角标(1=章右下角显示可点「验真」角标；缺省/0=不显示，
+ *                 验证页本身始终可用，与角标无关)
  * 注意：本文件是纯 JS，首尾绝不能包 <script> 标签！
  */
 (function () {
@@ -53,7 +55,7 @@
       return {
         n: String(o.n), d: String(o.d || ""), i: String(o.i || ""),
         t: +o.t || 0, e: +o.e || 0, m: String(o.m || ""), s: String(o.s || ""),
-        st: String(o.st || "official")
+        st: String(o.st || "official"), v: o.v ? 1 : 0
       };
     } catch (e) { return null; }
   }
@@ -280,14 +282,17 @@
     wrap.className = "sp-seal" + (st === "mismatch" || st === "expired" ? " sp-off" : "");
     wrap.innerHTML = renderSVG(data, st, size);
 
-    var a = document.createElement("a");
-    a.className = "sp-seal-link";
-    a.target = "_blank";
-    a.rel = "noopener";
-    a.href = VERIFY + "?d=" + encodeURIComponent(host || String(data.d).split("|")[0]) +
-      "&s=" + encodeURIComponent(str);
-    a.textContent = "验真";
-    wrap.appendChild(a);
+    /* 「验真」角标：仅在印章数据明确开启(v=1)时显示，默认关闭保持章面纯净 */
+    if (data.v) {
+      var a = document.createElement("a");
+      a.className = "sp-seal-link";
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.href = VERIFY + "?d=" + encodeURIComponent(host || String(data.d).split("|")[0]) +
+        "&s=" + encodeURIComponent(str);
+      a.textContent = "验真";
+      wrap.appendChild(a);
+    }
 
     el.innerHTML = "";
     el.appendChild(wrap);
@@ -342,7 +347,7 @@
 
   /* ---------- 对外 API ---------- */
   window.SealPlatform = {
-    version: "1.4",
+    version: "1.5",
     base: DEFAULT_BASE,
     src: _script && _script.src ? new URL(_script.src, location.href).href : "",
     verify: VERIFY,
