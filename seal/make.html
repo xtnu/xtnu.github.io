@@ -43,6 +43,11 @@
     background:rgba(255,255,255,.4);min-height:200px;
     display:flex;align-items:center;justify-content:center;
   }
+  .live-bar{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .theme-btn{cursor:pointer;border:1px solid #8a8676;background:rgba(255,255,255,.4);
+    color:#5a564c;font:12px/1 SimHei,STHeiti,sans-serif;letter-spacing:.2em;padding:6px 12px}
+  .theme-btn.on{background:#b3272d;border-color:#b3272d;color:#faf7ee}
+  .live-frame{width:100%;height:400px;border:1px solid #8a8676;background:#fff;display:block}
   .btn{
     display:block;width:100%;cursor:pointer;border:none;margin-top:8px;
     background:#b3272d;color:#faf7ee;font:16px/1 SimHei,STHeiti,sans-serif;
@@ -114,7 +119,7 @@
   <div class="sec">二、实时预览</div>
   <div class="preview-box" id="preview"><span style="color:#8a8676;font-size:13px;letter-spacing:.2em">（填写后此处出章）</span></div>
 
-  <div class="sec">三、摆放位置与获取代码</div>
+  <div class="sec">三、摆放位置与大小</div>
   <div class="grid">
     <div class="field">
       <label>摆放位置</label>
@@ -136,7 +141,7 @@
           <option value="float-center">悬浮 · 屏幕正中</option>
         </optgroup>
       </select>
-      <div class="tip">悬浮模式印章会固定在访客屏幕对应位置，不随页面滚动，并自带纸底衬托；嵌入与页面顶部/底部则跟随页面内容滚动。</div>
+      <div class="tip">悬浮模式印章会固定在访客屏幕对应位置，不随页面滚动；无底色纯章显示，点击可穿透印章直接点到底下的按钮或链接，仅右下角小"验真"角标可点。嵌入与页面顶部/底部则跟随页面内容滚动。</div>
     </div>
     <div class="field">
       <label>印章大小（像素）</label>
@@ -144,6 +149,18 @@
       <div class="tip">留空即用智能默认，也可稍后在代码里改 data-size。</div>
     </div>
   </div>
+
+  <div class="sec">四、网页效果预览</div>
+  <div class="live-bar">
+    <span style="font-size:12px;color:#8a8676;letter-spacing:.1em">模拟背景</span>
+    <button type="button" class="theme-btn on" id="theme-light">亮色</button>
+    <button type="button" class="theme-btn" id="theme-dark">暗色</button>
+    <span class="tip" style="margin:0">预览页可滚动 · 可点击体验穿透</span>
+  </div>
+  <iframe class="live-frame" id="live" title="网页嵌入效果预览"></iframe>
+  <div class="tip" style="margin-top:6px">这就是印章嵌入后的真实效果：与线上同一套渲染引擎和摆放逻辑，位置、大小即改即见。预览页按你绑定的域名模拟"已部署"状态，所以章面显示为有效章。</div>
+
+  <div class="sec">五、获取引入代码</div>
   <button class="btn" id="btn-gen">生 成 引 入 代 码</button>
   <div class="result" id="result">
     <div style="font-size:13px;color:#5a564c;margin:14px 0 6px;letter-spacing:.1em">将下面这行代码粘贴到你网页的任意位置（&lt;body&gt; 内）：</div>
@@ -158,7 +175,7 @@
     </div>
   </div>
 
-  <div class="sec">四、部署地址</div>
+  <div class="sec">六、部署地址</div>
   <div class="tip" style="margin:-6px 0 12px">已默认填好本平台地址（www.521567.xyz/seal/）。若你把这套文件部署到自己的空间，改成对应地址即可；通过网站正常访问本页时会自动探测更新。</div>
   <div class="grid">
     <div class="field">
@@ -180,6 +197,7 @@
   var SP = window.SealPlatform;
   var DEFAULT_JS = "https://www.521567.xyz/seal/seal.js";
   var DEFAULT_VERIFY = "https://www.521567.xyz/seal/check.html";
+  var theme = "light";
 
   function esc(s){
     return String(s).replace(/[&<>"]/g, function(c){
@@ -212,34 +230,116 @@
     };
   }
 
-  /* 实时预览 */
+  /* 拼装引入代码（生成与跟随预览共用） */
+  function scriptTag(src, str){
+    var pos = $("f-pos").value;
+    var size = parseInt($("f-size").value, 10);
+    var a = 'src="' + esc(src) + '" data-seal="' + str + '"';
+    if (pos && pos !== "inline") a += ' data-pos="' + pos + '"';
+    if (size > 0) a += ' data-size="' + size + '"';
+    return "<script " + a + "><\/script>";
+  }
+
+  /* ---------- 二、章面实时预览 ---------- */
+  function facePreview(){
+    var d = collect();
+    var box = $("preview");
+    if (!d.n || !d.d) {
+      box.innerHTML = '<span style="color:#8a8676;font-size:13px;letter-spacing:.2em">（填写单位名称与域名后此处出章）</span>';
+      return;
+    }
+    try {
+      SP.mount(box, d, {
+        host: d.d.split("|")[0].trim().toLowerCase().replace(/^\*\./,""),
+        size: 170
+      });
+    } catch(e){
+      box.innerHTML = '<span style="color:#b3272d;font-size:13px">预览出错：' + esc(e && e.message || e) + "</span>";
+    }
+  }
+
+  /* ---------- 四、网页效果预览（iframe 模拟真实嵌入） ---------- */
+  /* 预览注入的脚本地址用绝对路径，本地 file:// 双击打开同样可用 */
+  function liveSrc(){
+    try { return new URL("seal.js", location.href).href; } catch(e){ return "seal.js"; }
+  }
+  /* 在印章数据合法时，按绑定域名模拟"已部署"状态，预览显示有效章 */
+  var HOST_OVERRIDE =
+    '<script>(function(){var SP=window.SealPlatform;if(!SP)return;var _m=SP.mount;' +
+    "SP.mount=function(el,s,o){o=o||{};if(!( \"host\" in o)){try{var r=(typeof s===\"string\"?SP.parse(s):s);" +
+    'if(r&&r.d)o.host=String(r.d).split("|")[0].trim().toLowerCase().replace(/^\\*\\./,"");}catch(e){}}' +
+    'return _m(el,s,o);};})();<\/script>';
+
+  function buildDemoDoc(tag){
+    var dark = theme === "dark";
+    var c = dark
+      ? { bg:"#161616", fg:"#e8e6e1", sub:"#96938a", card:"#1f1f1f", line:"#3a3a3a", link:"#7ab0ff", noticeBg:"#3d2b2b" }
+      : { bg:"#f6f3ea", fg:"#2b2a26", sub:"#7a7466", card:"#ffffff", line:"#e4ddc9", link:"#2d6cdf", noticeBg:"#f7e3e3" };
+    var notice = tag ? "" :
+      '<div style="padding:10px 16px;background:' + c.noticeBg + ';color:#b3272d;font-size:13px">' +
+      "填写单位名称与绑定域名后，这里将显示印章的真实嵌入效果。</div>";
+    return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><style>' +
+      "body{margin:0;font:15px/2.1 FangSong,STFangsong,sans-serif;background:" + c.bg + ";color:" + c.fg + "}" +
+      ".hd{padding:24px 20px 12px;text-align:center;border-bottom:3px double #b3272d}" +
+      ".hd h1{margin:0;font-size:22px;letter-spacing:.25em}" +
+      ".hd p{margin:2px 0 0;font-size:11px;color:" + c.sub + ";letter-spacing:.4em}" +
+      ".wrap{padding:14px 20px 40px}" +
+      ".card{background:" + c.card + ";border:1px solid " + c.line + ";padding:12px 16px;margin:12px 0;font-size:14px}" +
+      ".demo-btn{display:inline-block;background:#2d6cdf;color:#fff;border:none;border-radius:5px;padding:9px 18px;font-size:14px;cursor:pointer}" +
+      ".foot{margin-top:26px;padding:12px;text-align:center;font-size:12px;color:" + c.sub + ";border-top:1px solid " + c.line + "}" +
+      "</style></head><body>" + notice +
+      '<div class="hd"><h1>山间小筑</h1><p>个人博客 · 记录与分享</p></div>' +
+      '<div class="wrap">' +
+      "<p>欢迎光临！这里记录一些折腾的痕迹：代码、随笔，还有猫。</p>" +
+      (tag || '<p style="color:' + c.sub + ';font-size:13px">（印章将出现在这里，或按所选位置摆放）</p>') +
+      '<div class="card">最新文章：《给网站盖一枚章》。试着点击被印章盖住的按钮——点击会穿透印章。</div>' +
+      '<p><button class="demo-btn" id="pv-btn">我是页面按钮（穿透演示）</button>' +
+      '<span id="pv-n" style="font-size:13px;color:' + c.sub + '"></span></p>' +
+      "<p>往下滚动这个预览页：悬浮位置的印章会一直停在屏幕角落不跟着跑；「页面顶部 / 底部」位置则会随内容滚动。</p>" +
+      "<p>占位段落一，模拟正常网页的排版长度。</p>" +
+      "<p>占位段落二，模拟正常网页的排版长度。</p>" +
+      "<p>占位段落三，模拟正常网页的排版长度。</p>" +
+      '<div class="foot">© 山间小筑 · 这里是页脚（bottom 位置的印章会出现在这一带）</div>' +
+      "</div>" +
+      (tag ? tag + HOST_OVERRIDE : "") +
+      "<scr" + "ipt>var n=0,b=document.getElementById('pv-btn');" +
+      "if(b)b.addEventListener('click',function(){n++;document.getElementById('pv-n').textContent='—— 按钮已被点击 '+n+' 次，印章没有挡住我';});<\/scr" + "ipt>" +
+      "</body></html>";
+  }
+  function updateLive(){
+    if (!SP) return;
+    var d = collect();
+    var ok = d.n && d.d && /\./.test(d.d);
+    var tag = ok ? scriptTag(liveSrc(), SP.b64e(JSON.stringify(d))) : "";
+    $("live").srcdoc = buildDemoDoc(tag);
+  }
+
+  /* 防抖：所有输入统一刷新两种预览 */
   var pt;
-  function preview(){
+  function refresh(){
     if (!SP) return;
     clearTimeout(pt);
     pt = setTimeout(function(){
-      var d = collect();
-      var box = $("preview");
-      if (!d.n || !d.d) {
-        box.innerHTML = '<span style="color:#8a8676;font-size:13px;letter-spacing:.2em">（填写单位名称与域名后此处出章）</span>';
-        return;
-      }
-      try {
-        SP.mount(box, d, {
-          host: d.d.split("|")[0].trim().toLowerCase().replace(/^\*\./,""),
-          size: 170
-        });
-      } catch(e){
-        box.innerHTML = '<span style="color:#b3272d;font-size:13px">预览出错：' + esc(e && e.message || e) + "</span>";
-      }
+      facePreview();
+      updateLive();
     }, 250);
   }
-  ["f-name","f-domain","f-cap","f-msg","f-exp","f-style"].forEach(function(id){
-    $(id).addEventListener("input", preview);
-    $(id).addEventListener("change", preview);
+  ["f-name","f-domain","f-cap","f-msg","f-exp","f-style","f-pos","f-size"].forEach(function(id){
+    $(id).addEventListener("input", refresh);
+    $(id).addEventListener("change", refresh);
   });
 
-  /* 生成 */
+  /* 主题切换 */
+  function setTheme(t){
+    theme = t;
+    $("theme-light").className = "theme-btn" + (t === "light" ? " on" : "");
+    $("theme-dark").className = "theme-btn" + (t === "dark" ? " on" : "");
+    updateLive();
+  }
+  $("theme-light").addEventListener("click", function(){ setTheme("light"); });
+  $("theme-dark").addEventListener("click", function(){ setTheme("dark"); });
+
+  /* ---------- 五、生成 ---------- */
   $("btn-gen").addEventListener("click", function(){
     if (!SP) { alert("seal.js 未加载成功，无法生成。请确认 seal.js 与本页面在同一目录后刷新重试。"); return; }
     var d = collect();
@@ -248,13 +348,7 @@
     if (!/\./.test(d.d)) { alert("域名格式看起来不太对，请检查。"); return; }
 
     var js = $("f-jsurl").value.trim() || DEFAULT_JS;
-    var str = SP.b64e(JSON.stringify(d));
-    var pos = $("f-pos").value;
-    var size = parseInt($("f-size").value, 10);
-    var attrs = 'src="' + js + '" data-seal="' + str + '"';
-    if (pos && pos !== "inline") attrs += ' data-pos="' + pos + '"';
-    if (size > 0) attrs += ' data-size="' + size + '"';
-    $("out-code").value = "<script " + attrs + "><\/script>";
+    $("out-code").value = scriptTag(js, SP.b64e(JSON.stringify(d)));
     $("result").style.display = "block";
     $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
@@ -281,6 +375,9 @@
       legacy();
     }
   });
+
+  /* 初始渲染一次网页效果预览 */
+  updateLive();
 })();
 </script>
 </body>

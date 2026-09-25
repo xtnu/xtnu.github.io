@@ -1,5 +1,5 @@
 /*!
- * 印章平台 seal.js v1.3 —— 零后端、零存储的网页印章
+ * 印章平台 seal.js v1.4 —— 零后端、零存储的网页印章
  *
  * 用法（在网页任意位置插入一行）：
  *   <script src="https://www.521567.xyz/seal/seal.js" data-seal="BASE64数据串"></script>
@@ -230,15 +230,16 @@
   var css = document.createElement("style");
   css.textContent =
     ".sp-seal{display:inline-block;position:relative;line-height:0;vertical-align:middle}" +
-    ".sp-seal svg{mix-blend-mode:multiply}" +
-    ".sp-seal.sp-off svg{filter:grayscale(.9);opacity:.65}" +
+    /* 无底色纯印章：不再用 multiply（深色背景会把章染黑），改轻微透明保留印泥感 */
+    ".sp-seal svg{opacity:.92}" +
+    ".sp-seal.sp-off svg{filter:grayscale(.85);opacity:.8}" +
     '.sp-seal-link{position:absolute;right:2px;bottom:2px;font:10px/1.4 "Microsoft YaHei",sans-serif;' +
     "color:#b3272d;text-decoration:none;opacity:.55;letter-spacing:1px;transition:opacity .2s}" +
     ".sp-seal-link:hover{opacity:1}" +
-    /* 悬浮模式：固定在屏幕对应位置，垫一层纸底保证任何网页上都清晰 */
-    ".sp-float{position:fixed;z-index:2147483000;background:rgba(250,247,238,.94);" +
-    "border:1px solid rgba(179,39,45,.28);border-radius:4px;padding:6px;" +
-    "box-shadow:0 4px 18px rgba(0,0,0,.18)}" +
+    /* 悬浮模式：无底色、无方框，纯印章悬浮；点击全部穿透到下层网页，
+       仅「验真」小角标保留可点（不挡下层按钮/链接） */
+    ".sp-float{position:fixed;z-index:2147483000;pointer-events:none}" +
+    ".sp-float .sp-seal-link{pointer-events:auto}" +
     ".sp-float-br{right:16px;bottom:16px}" +
     ".sp-float-bl{left:16px;bottom:16px}" +
     ".sp-float-tr{right:16px;top:16px}" +
@@ -316,9 +317,11 @@
       var size = parseInt(tag.dataset.size, 10) || 0;   /* 0 = 交给 mount 智能默认 */
       var pos = tag.dataset.pos || "inline";            /* 原始值交给 mount 统一归一化+告警 */
       var target = tag.dataset.target ? document.querySelector(tag.dataset.target) : null;
+      /* 通过对外 API 调用，便于外部（如生成页预览）包装扩展 */
+      var apiMount = (window.SealPlatform && window.SealPlatform.mount) || mount;
 
       list.forEach(function (s) {
-        if (target) { mount(target, s, { size: size }); return; }
+        if (target) { apiMount(target, s, { size: size }); return; }
         var holder = document.createElement("div");
         var pn = tag.parentNode;
         if (pn && pn.nodeName !== "HEAD" && pn.nodeName !== "HTML") {
@@ -326,7 +329,7 @@
         } else if (document.body) {
           document.body.appendChild(holder);
         }
-        mount(holder, s, { size: size, pos: pos });
+        apiMount(holder, s, { size: size, pos: pos });
       });
     }
   }
@@ -339,7 +342,7 @@
 
   /* ---------- 对外 API ---------- */
   window.SealPlatform = {
-    version: "1.3",
+    version: "1.4",
     base: DEFAULT_BASE,
     src: _script && _script.src ? new URL(_script.src, location.href).href : "",
     verify: VERIFY,
