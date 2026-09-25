@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>印章生成 · 印章平台</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:#4d5648;font-family:FangSong,STFangsong,SimSun,serif;
+    color:#26241f;padding:40px 16px;min-height:100vh;
+  }
+  .paper{
+    max-width:760px;margin:0 auto;background:#faf7ee;
+    padding:44px clamp(24px,5vw,56px) 50px;
+    box-shadow:0 12px 40px rgba(0,0,0,.4);
+  }
+  h1{
+    text-align:center;color:#b3272d;font-family:SimHei,STHeiti,sans-serif;
+    font-size:clamp(24px,4vw,34px);letter-spacing:.1em;margin-bottom:6px;
+  }
+  .sub{text-align:center;color:#5a564c;font-size:13px;letter-spacing:.3em;margin-bottom:8px}
+  .rule{display:flex;align-items:center;gap:12px;margin:10px 0 30px}
+  .rule::before,.rule::after{content:"";flex:1;height:2px;background:#b3272d}
+  .rule svg{display:block}
+
+  .sec{font-family:SimHei,STHeiti,sans-serif;font-size:16px;letter-spacing:.05em;
+    border-left:4px solid #b3272d;padding-left:10px;margin:28px 0 14px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:14px;margin-bottom:5px;color:#5a564c;letter-spacing:.1em}
+  .field label b{color:#b3272d}
+  .field input,.field select,.field textarea{
+    width:100%;font:15px/1.6 FangSong,serif;padding:9px 12px;
+    border:1px solid #8a8676;background:#fff;color:#26241f;outline:none;
+  }
+  .field input:focus,.field textarea:focus{border-color:#b3272d}
+  .field .tip{font-size:12px;color:#8a8676;margin-top:4px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+
+  .preview-box{
+    border:1px dashed #8a8676;padding:24px;text-align:center;
+    background:rgba(255,255,255,.4);min-height:200px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .btn{
+    display:block;width:100%;cursor:pointer;border:none;margin-top:8px;
+    background:#b3272d;color:#faf7ee;font:16px/1 SimHei,STHeiti,sans-serif;
+    letter-spacing:.4em;text-indent:.4em;padding:15px;
+    transition:opacity .2s;
+  }
+  .btn:hover{opacity:.88}
+  .btn.small{font-size:13px;padding:9px;margin-top:12px}
+
+  .result{display:none;margin-top:20px}
+  textarea.code{
+    width:100%;height:96px;font:12px/1.6 Consolas,monospace;
+    padding:10px;border:1px solid #8a8676;background:#fff;color:#26241f;
+    white-space:pre;word-break:break-all;resize:vertical;
+  }
+  .ok-note{font-size:13px;color:#5a564c;line-height:2;margin-top:14px}
+  .ok-note b{color:#b3272d}
+</style>
+</head>
+<body>
+<div class="paper">
+  <h1>印章签发</h1>
+  <div class="sub">SEAL GENERATOR · 免费公开 · 无需注册</div>
+  <div class="rule" aria-hidden="true">
+    <svg width="16" height="16" viewBox="-10 -10 20 20"><path fill="#b3272d" d="M0,-9 L2.7,-2.8 L9.4,-2.8 L4,1.5 L6,8 L0,4.2 L-6,8 L-4,1.5 L-9.4,-2.8 L-2.7,-2.8 Z"/></svg>
+  </div>
+
+  <div class="sec">一、填写印章信息</div>
+  <div class="field">
+    <label>单位名称 <b>＊</b>（将刻在印章环形外圈）</label>
+    <input id="f-name" maxlength="20" placeholder="例：夏透喃网络办公室" value="">
+  </div>
+  <div class="field">
+    <label>绑定域名 <b>＊</b></label>
+    <input id="f-domain" placeholder="例：521567.xyz 或 www.521567.xyz，多个用 | 分隔，支持 *.example.com">
+    <div class="tip">印章只会在这些域名下正常显示，复制到别的网站会自动显示"域名不符"。</div>
+  </div>
+  <div class="field">
+    <label>印章样式</label>
+    <select id="f-style">
+      <option value="official">正式章 · 五角星</option>
+      <option value="paw">猫爪章</option>
+      <option value="smile">笑脸章</option>
+      <option value="bolt">闪电章</option>
+      <option value="heart">爱心章</option>
+    </select>
+    <div class="tip">本平台为纯娱乐性质，不具备任何官方效力。除正式章外观外，推荐使用娱乐样式，避免任何冒充官方机构的误解。</div>
+  </div>
+  <div class="grid">
+    <div class="field">
+      <label>章面下标文字</label>
+      <input id="f-cap" maxlength="10" placeholder="默认：网络专用" value="网络专用">
+    </div>
+    <div class="field">
+      <label>有效期</label>
+      <select id="f-exp">
+        <option value="0">永久有效</option>
+        <option value="365">1 年</option>
+        <option value="730" selected>2 年</option>
+        <option value="1095">3 年</option>
+      </select>
+    </div>
+  </div>
+  <div class="field">
+    <label>隐藏留言（可选，仅验证页可见的彩蛋）</label>
+    <input id="f-msg" maxlength="60" placeholder="例：本站由一只猫代为运营，出事找猫。">
+  </div>
+
+  <div class="sec">二、实时预览</div>
+  <div class="preview-box" id="preview"><span style="color:#8a8676;font-size:13px;letter-spacing:.2em">（填写后此处出章）</span></div>
+
+  <div class="sec">三、获取引入代码</div>
+  <button class="btn" id="btn-gen">生 成 引 入 代 码</button>
+  <div class="result" id="result">
+    <div style="font-size:13px;color:#5a564c;margin:14px 0 6px;letter-spacing:.1em">将下面这行代码粘贴到你网页的任意位置（&lt;body&gt; 内）：</div>
+    <textarea class="code" id="out-code" readonly></textarea>
+    <button class="btn small" id="btn-copy">复 制 代 码</button>
+    <div class="ok-note">
+      使用说明：<b>①</b> 代码可放在网页任意位置，印章会显示在代码插入处；
+      想指定位置可在生成后自行给外层套一个容器。<b>②</b> 本平台不保存任何数据，
+      印章信息全部包含在这行代码里，请自行留档。<b>③</b> 别人查看你的源代码也能
+      看到并修改这些信息——本平台定位娱乐，不设加密，验证以
+      <a href="check.html" style="color:#b3272d" target="_blank">验证页</a>为准。
+    </div>
+  </div>
+
+  <div class="sec">四、部署地址</div>
+  <div class="tip" style="margin:-6px 0 12px">已默认填好本平台地址（www.521567.xyz/seal/）。若你把这套文件部署到自己的空间，改成对应地址即可；通过网站正常访问本页时会自动探测更新。</div>
+  <div class="grid">
+    <div class="field">
+      <label>seal.js 部署地址</label>
+      <input id="f-jsurl" value="https://www.521567.xyz/seal/seal.js" placeholder="https://www.521567.xyz/seal/seal.js">
+    </div>
+    <div class="field">
+      <label>验证页地址</label>
+      <input id="f-verifyurl" value="https://www.521567.xyz/seal/check.html" placeholder="https://www.521567.xyz/seal/check.html">
+    </div>
+  </div>
+</div>
+
+<script src="seal.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var SP = window.SealPlatform;
+  var DEFAULT_JS = "https://www.521567.xyz/seal/seal.js";
+  var DEFAULT_VERIFY = "https://www.521567.xyz/seal/check.html";
+
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+
+  /* 部署地址：先填默认值，再让部署后的自动探测覆盖 */
+  $("f-jsurl").value = DEFAULT_JS;
+  $("f-verifyurl").value = DEFAULT_VERIFY;
+  if (SP && SP.src && /^https?:/i.test(SP.src)) {
+    $("f-jsurl").value = SP.src;
+    $("f-verifyurl").value = SP.verify;
+  }
+  if (!SP) {
+    $("preview").innerHTML =
+      '<span style="color:#b3272d;font-size:13px">渲染器 seal.js 加载失败：请确认 seal.js 与本页面在同一目录，且文件内没有包 &lt;script&gt; 标签，然后刷新。</span>';
+  }
+
+  function collect(){
+    return {
+      n: $("f-name").value.trim(),
+      d: $("f-domain").value.trim(),
+      i: (crypto.randomUUID ? crypto.randomUUID().replace(/-/g,"").slice(0,8) : String(Date.now()).slice(-8)),
+      t: Date.now(),
+      e: (function(){ var v = parseInt($("f-exp").value,10); return v ? Date.now() + v*86400000 : 0; })(),
+      m: $("f-msg").value.trim(),
+      s: $("f-cap").value.trim() || "网络专用",
+      st: $("f-style").value
+    };
+  }
+
+  /* 实时预览 */
+  var pt;
+  function preview(){
+    if (!SP) return;
+    clearTimeout(pt);
+    pt = setTimeout(function(){
+      var d = collect();
+      var box = $("preview");
+      if (!d.n || !d.d) {
+        box.innerHTML = '<span style="color:#8a8676;font-size:13px;letter-spacing:.2em">（填写单位名称与域名后此处出章）</span>';
+        return;
+      }
+      try {
+        SP.mount(box, d, {
+          host: d.d.split("|")[0].trim().toLowerCase().replace(/^\*\./,""),
+          size: 170
+        });
+      } catch(e){
+        box.innerHTML = '<span style="color:#b3272d;font-size:13px">预览出错：' + esc(e && e.message || e) + "</span>";
+      }
+    }, 250);
+  }
+  ["f-name","f-domain","f-cap","f-msg","f-exp","f-style"].forEach(function(id){
+    $(id).addEventListener("input", preview);
+    $(id).addEventListener("change", preview);
+  });
+
+  /* 生成 */
+  $("btn-gen").addEventListener("click", function(){
+    if (!SP) { alert("seal.js 未加载成功，无法生成。请确认 seal.js 与本页面在同一目录后刷新重试。"); return; }
+    var d = collect();
+    if (!d.n) { alert("请填写单位名称。"); return; }
+    if (!d.d) { alert("请填写绑定域名。"); return; }
+    if (!/\./.test(d.d)) { alert("域名格式看起来不太对，请检查。"); return; }
+
+    var js = $("f-jsurl").value.trim() || DEFAULT_JS;
+    var str = SP.b64e(JSON.stringify(d));
+    $("out-code").value = '<script src="' + js + '" data-seal="' + str + '"><\/script>';
+    $("result").style.display = "block";
+    $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  /* 复制：优先 Clipboard API（异步失败会回退），否则 execCommand 兜底 */
+  $("btn-copy").addEventListener("click", function(){
+    var b = this, ta = $("out-code");
+    function done(ok){
+      b.textContent = ok ? "已 复 制 ✓" : "复制失败，请手动 Ctrl+C";
+      setTimeout(function(){ b.textContent = "复 制 代 码"; }, 2200);
+    }
+    function legacy(){
+      var ok = false;
+      try {
+        ta.focus(); ta.select();
+        try { ta.setSelectionRange(0, ta.value.length); } catch(e){}
+        ok = document.execCommand("copy");
+      } catch(e){}
+      done(ok);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(ta.value).then(function(){ done(true); }, legacy);
+    } else {
+      legacy();
+    }
+  });
+})();
+</script>
+</body>
+</html>

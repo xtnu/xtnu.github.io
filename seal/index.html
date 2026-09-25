@@ -1,1 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>印章平台 · 给你的网站盖个章</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:#4d5648;font-family:FangSong,STFangsong,SimSun,serif;
+    color:#26241f;padding:40px 16px;min-height:100vh;
+  }
+  .paper{
+    max-width:760px;margin:0 auto;background:#faf7ee;
+    padding:48px clamp(24px,5vw,56px) 56px;
+    box-shadow:0 12px 40px rgba(0,0,0,.4);text-align:center;
+  }
+  h1{
+    color:#b3272d;font-family:SimHei,STHeiti,sans-serif;
+    font-size:clamp(26px,5vw,38px);letter-spacing:.1em;margin-bottom:8px;
+  }
+  .sub{color:#5a564c;font-size:13px;letter-spacing:.35em;margin-bottom:10px}
+  .rule{display:flex;align-items:center;gap:12px;margin:10px 0 34px}
+  .rule::before,.rule::after{content:"";flex:1;height:2px;background:#b3272d}
+  .rule svg{display:block}
 
+  .intro{font-size:16px;line-height:2.2;text-align:justify;text-indent:2em;color:#26241f}
+  .demo{margin:30px 0}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:30px 0}
+  .step{border:1px solid #8a8676;background:rgba(255,255,255,.4);padding:18px 16px;text-align:left}
+  .step h3{font-family:SimHei,STHeiti,sans-serif;font-size:15px;letter-spacing:.1em;color:#b3272d;margin-bottom:8px}
+  .step p{font-size:13.5px;line-height:1.9;color:#5a564c}
+  .go{
+    display:inline-block;background:#b3272d;color:#faf7ee;text-decoration:none;
+    font:16px/1 SimHei,STHeiti,sans-serif;letter-spacing:.3em;text-indent:.3em;
+    padding:15px 28px;margin:4px 8px;transition:opacity .2s;
+  }
+  .go:hover{opacity:.88}
+  .go.ghost{background:none;color:#b3272d;border:1.5px solid #b3272d}
+  footer{margin-top:36px;font-size:12.5px;color:#8a8676;letter-spacing:.2em;line-height:2}
+</style>
+</head>
+<body>
+<div class="paper">
+  <h1>网页印章平台</h1>
+  <div class="sub">纯静态 · 无后端 · 无存储 · 免费开放</div>
+  <div class="rule" aria-hidden="true">
+    <svg width="16" height="16" viewBox="-10 -10 20 20"><path fill="#b3272d" d="M0,-9 L2.7,-2.8 L9.4,-2.8 L4,1.5 L6,8 L0,4.2 L-6,8 L-4,1.5 L-9.4,-2.8 L-2.7,-2.8 Z"/></svg>
+  </div>
+
+  <p class="intro">这是一个给网站盖公章的小玩意。你的网站 deserves 一枚正式的红印章——仿公文样式、印泥质感、绑定域名、自带验真。不注册、不登记、不留数据：印章的全部信息就在那行引入代码里，由你自己的网页保管；想验真，任何人都可以来这里查。</p>
+
+  <div class="demo" id="demo"></div>
+
+  <div class="steps">
+    <div class="step"><h3>① 生成</h3><p>打开生成页，填写单位名称和你的域名，实时预览，一键复制引入代码。</p></div>
+    <div class="step"><h3>② 嵌入</h3><p>把那行 &lt;script&gt; 粘贴进网页任意位置，印章当场生效，离开你的域名会自动失效。</p></div>
+    <div class="step"><h3>③ 验真</h3><p>点击印章上的「验真」角标，或在本站输入域名查验印章信息与隐藏留言。</p></div>
+  </div>
+
+  <a class="go" href="make.html">生成我的印章</a>
+  <a class="go ghost" href="check.html">查验一枚印章</a>
+
+  <footer>印章即验证入口 · 复制即传播 · 娱乐用途，不构成任何法律效力</footer>
+</div>
+
+<script src="seal.js"></script>
+<script>
+(function(){
+  var SP = window.SealPlatform;
+  if (!SP) return;
+  var demo = {
+    n: "印章平台演示专用章", d: "demo.local", i: "DEMO0001",
+    t: Date.now(), e: 0, s: "示例专用", st: "paw",
+    m: "这是隐藏留言彩蛋——去验证页就能看到这行字。"
+  };
+  SP.mount(document.getElementById("demo"), demo, { host: "demo.local", size: 180 });
+})();
+</script>
+</body>
+</html>

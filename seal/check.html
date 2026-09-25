@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>印章验证 · 印章平台</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:#4d5648;font-family:FangSong,STFangsong,SimSun,serif;
+    color:#26241f;padding:40px 16px;min-height:100vh;
+  }
+  .paper{
+    max-width:720px;margin:0 auto;background:#faf7ee;
+    padding:44px clamp(24px,5vw,56px) 50px;
+    box-shadow:0 12px 40px rgba(0,0,0,.4);
+  }
+  h1{
+    text-align:center;color:#b3272d;font-family:SimHei,STHeiti,sans-serif;
+    font-size:clamp(24px,4vw,34px);letter-spacing:.1em;margin-bottom:6px;
+  }
+  .sub{text-align:center;color:#5a564c;font-size:13px;letter-spacing:.3em;margin-bottom:8px}
+  .rule{display:flex;align-items:center;gap:12px;margin:10px 0 28px}
+  .rule::before,.rule::after{content:"";flex:1;height:2px;background:#b3272d}
+  .rule svg{display:block}
+
+  .tabs{display:flex;margin-bottom:18px;border:1px solid #8a8676}
+  .tab{
+    flex:1;cursor:pointer;text-align:center;padding:11px 0;
+    font:14px/1 SimHei,STHeiti,sans-serif;letter-spacing:.25em;text-indent:.25em;
+    color:#5a564c;background:rgba(255,255,255,.35);border:none;
+  }
+  .tab.on{background:#b3272d;color:#faf7ee}
+
+  .qbar{display:flex;gap:10px;margin-bottom:6px}
+  .qbar input{
+    flex:1;font:15px/1.6 FangSong,serif;padding:10px 12px;
+    border:1px solid #8a8676;background:#fff;outline:none;
+  }
+  .qbar input:focus{border-color:#b3272d}
+  .qbar button{
+    cursor:pointer;border:none;background:#b3272d;color:#faf7ee;
+    font:14px/1 SimHei,STHeiti,sans-serif;letter-spacing:.2em;text-indent:.2em;
+    padding:10px 20px;white-space:nowrap;
+  }
+  .paste-area{width:100%;height:80px;font:12px/1.6 Consolas,monospace;
+    padding:10px;border:1px solid #8a8676;background:#fff;
+    word-break:break-all;resize:vertical;outline:none}
+  .hint{font-size:12.5px;color:#8a8676;line-height:1.9;margin-bottom:4px}
+
+  .status{margin:20px 0;padding:12px 16px;font-size:14px;line-height:2;
+    border-left:4px solid #8a8676;background:rgba(255,255,255,.4);color:#5a564c}
+  .status.busy{border-color:#b3272d;color:#b3272d;letter-spacing:.1em}
+  .status.bad{border-color:#b3272d;color:#b3272d}
+
+  .seal-card{
+    border:1px solid #8a8676;background:rgba(255,255,255,.5);
+    padding:22px;margin-bottom:16px;
+    display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;
+  }
+  .seal-card .pic{flex:0 0 auto;padding-top:4px}
+  .seal-card table{flex:1;min-width:260px;border-collapse:collapse;font-size:14px;line-height:1.9}
+  .seal-card th,.seal-card td{border:1px solid #8a8676;padding:6px 12px;vertical-align:top}
+  .seal-card th{background:#f2eddd;font-family:SimHei,STHeiti,sans-serif;
+    font-weight:normal;letter-spacing:.1em;width:104px;white-space:nowrap}
+  .st-valid{color:#b3272d;font-weight:bold}
+  .st-bad{color:#b3272d;font-weight:bold}
+
+  footer{margin-top:34px;text-align:center;font-size:12.5px;color:#8a8676;
+    letter-spacing:.2em;line-height:2}
+  footer a{color:#5a564c}
+</style>
+</head>
+<body>
+<div class="paper">
+  <h1>印章验证</h1>
+  <div class="sub">SEAL VERIFICATION · 公开查验 · 无需登记</div>
+  <div class="rule" aria-hidden="true">
+    <svg width="16" height="16" viewBox="-10 -10 20 20"><path fill="#b3272d" d="M0,-9 L2.7,-2.8 L9.4,-2.8 L4,1.5 L6,8 L0,4.2 L-6,8 L-4,1.5 L-9.4,-2.8 L-2.7,-2.8 Z"/></svg>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" id="tab-domain">按域名查验</button>
+    <button class="tab" id="tab-paste">粘贴数据串查验</button>
+  </div>
+
+  <div id="mode-domain">
+    <div class="qbar">
+      <input id="q-domain" placeholder="输入网站域名，如 521567.xyz" spellcheck="false">
+      <button id="btn-query">查 验</button>
+    </div>
+    <div class="hint">将抓取该域名的网页，提取并核验其印章信息。对方网站需可公开访问。</div>
+  </div>
+
+  <div id="mode-paste" style="display:none">
+    <textarea class="paste-area" id="q-paste" placeholder="粘贴印章数据串（data-seal 的 Base64 内容，或含 &lt;script&gt; 的完整引入代码均可）" spellcheck="false"></textarea>
+    <div style="margin-top:10px">
+      <button class="qbar" style="display:block;width:100%;cursor:pointer;border:none;background:#b3272d;color:#faf7ee;font:14px/1 SimHei,sans-serif;letter-spacing:.2em;text-indent:.2em;padding:12px" id="btn-parse">解 析 查 验</button>
+    </div>
+    <div class="hint" style="margin-top:8px">适合本地打开的页面、或想直接核验一段印章代码真伪的场景。</div>
+  </div>
+
+  <div class="status" id="status">等待查验。输入域名或粘贴数据串。</div>
+  <div id="results"></div>
+
+  <footer>
+    本平台为纯静态娱乐项目 · 不存储任何数据 · 印章信息以各网站源代码为准<br>
+    <a href="make.html">给自己也盖一个 →</a>
+  </footer>
+</div>
+
+<script src="seal.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var SP = window.SealPlatform;
+  var statusEl = $("status"), resultsEl = $("results");
+
+  function setStatus(txt, cls){
+    statusEl.textContent = txt;
+    statusEl.className = "status" + (cls ? " " + cls : "");
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+  function pad(n){ return n < 10 ? "0" + n : "" + n; }
+  /* 统一按北京时间（UTC+8）显示，避免访问者时区不同导致日期漂移 */
+  function fmt(ts){
+    if (!ts) return "—";
+    var d = new Date(ts + 8 * 3600000);
+    return d.getUTCFullYear() + "-" + pad(d.getUTCMonth()+1) + "-" + pad(d.getUTCDate());
+  }
+  function cleanHost(raw){
+    return String(raw || "").replace(/^https?:\/\//i, "").replace(/\/.*$/, "").trim().toLowerCase();
+  }
+  var STYLE_NAMES = {
+    official: "正式章（五角星）", paw: "猫爪章", smile: "笑脸章",
+    bolt: "闪电章", heart: "爱心章"
+  };
+
+  /* ---------- 结果卡片 ---------- */
+  function showSeal(str, host){
+    var data = SP.parse(str);
+    if (!data) return false;
+    var st = SP.status(data, host === undefined ? null : host);
+    var stTxt = {
+      valid:    '<span class="st-valid">有效 ★</span>',
+      mismatch: '<span class="st-bad">域名不符</span>（印章数据与该域名不一致）',
+      expired:  '<span class="st-bad">已过审验期</span>（原有效期至 ' + fmt(data.e) + "）",
+      preview:  "信息解析如下"
+    }[st];
+    var card = document.createElement("div");
+    card.className = "seal-card";
+    card.innerHTML =
+      '<div class="pic" id="card-' + Math.random().toString(36).slice(2) + '"></div>' +
+      "<table><tbody>" +
+      "<tr><th>单位名称</th><td>" + esc(data.n) + "</td></tr>" +
+      "<tr><th>绑定域名</th><td>" + esc(data.d) + "</td></tr>" +
+      "<tr><th>印章样式</th><td>" + esc(STYLE_NAMES[data.st] || data.st || "正式章（五角星）") + "</td></tr>" +
+      "<tr><th>印章编号</th><td>" + esc(data.i || "—") + "</td></tr>" +
+      "<tr><th>签发日期</th><td>" + fmt(data.t) + "</td></tr>" +
+      "<tr><th>有效期至</th><td>" + (data.e ? fmt(data.e) : "永久") + "</td></tr>" +
+      (host ? '<tr><th>核验结果</th><td>' + stTxt + "</td></tr>" : "") +
+      (data.m ? '<tr><th>隐藏留言</th><td style="font-family:KaiTi,STKaiti,serif;font-size:15.5px">' + esc(data.m) + "</td></tr>" : "") +
+      "</tbody></table>";
+    resultsEl.appendChild(card);
+    SP.mount(card.querySelector(".pic"), str, { host: host === undefined ? null : host, size: 150 });
+    return true;
+  }
+
+  /* ---------- Tab 切换 ---------- */
+  function switchTab(which){
+    var d = which === "domain";
+    $("tab-domain").className = "tab" + (d ? " on" : "");
+    $("tab-paste").className = "tab" + (d ? "" : " on");
+    $("mode-domain").style.display = d ? "" : "none";
+    $("mode-paste").style.display = d ? "none" : "";
+  }
+  $("tab-domain").addEventListener("click", function(){ switchTab("domain"); });
+  $("tab-paste").addEventListener("click", function(){ switchTab("paste"); });
+
+  /* ---------- 域名模式：抓取 + 提取 ---------- */
+  var PROXIES = [
+    function(u){ return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+    function(u){ return "https://corsproxy.io/?url=" + encodeURIComponent(u); },
+    function(u){ return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
+  ];
+
+  async function fetchHTML(raw){
+    var url = cleanHost(raw);
+    if (!url || !/\./.test(url)) throw new Error("bad-domain");
+    var full = "https://" + url + "/";
+    try {
+      var r = await fetch(full, { mode: "cors" });
+      if (r.ok) { var t = await r.text(); if (t) return t; }
+    } catch (e) {}
+    for (var i = 0; i < PROXIES.length; i++) {
+      try {
+        var r2 = await fetch(PROXIES[i](full));
+        if (r2.ok) {
+          var t2 = await r2.text();
+          if (t2 && t2.length > 30) return t2;
+        }
+      } catch (e) {}
+    }
+    throw new Error("fetch-failed");
+  }
+
+  function extractSeals(html){
+    var found = [];
+    var re = /data-seals?\s*=\s*(?:"([^"]*)"|'([^']*)')/g, m;
+    while ((m = re.exec(html))) {
+      var val = m[1] !== undefined ? m[1] : m[2];
+      if (!val) continue;
+      val = val.replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+      var c = val.trim().charAt(0);
+      if (c === "[") {
+        try {
+          JSON.parse(val).forEach(function(x){
+            if (typeof x === "string") found.push(x);
+            else if (x && x.n) found.push(SP.b64e(JSON.stringify(x)));
+          });
+        } catch (e) {}
+      } else if (c === "{") {
+        try {
+          var o = JSON.parse(val);
+          if (o && o.n) found.push(SP.b64e(JSON.stringify(o)));
+        } catch (e) {}
+      } else {
+        found.push(val);
+      }
+    }
+    return found;
+  }
+
+  async function queryDomain(domain){
+    resultsEl.innerHTML = "";
+    var host = cleanHost(domain);
+    if (!host || !/\./.test(host)) { setStatus("请输入一个有效的域名。", "bad"); return; }
+    $("q-domain").value = host;
+    setStatus("正在抓取 " + host + " 的页面并提取印章……", "busy");
+    try {
+      var html = await fetchHTML(host);
+      var seals = extractSeals(html);
+      if (!seals.length) {
+        setStatus("已抓取到 " + host + " 的页面，但未发现任何印章。该网站可能没有盖章，或印章由其他方式引入。", "bad");
+        return;
+      }
+      var n = 0;
+      seals.forEach(function(s){ if (showSeal(s, host)) n++; });
+      setStatus("查验完毕：在 " + host + " 发现 " + n + " 枚印章，详情如下。");
+    } catch (e) {
+      setStatus("无法抓取 " + host + "（对方站点不可访问或所有通道均失败）。可改用「粘贴数据串查验」模式。", "bad");
+    }
+  }
+
+  /* ---------- 粘贴模式（可传入来源域名做即时核验） ---------- */
+  function parsePaste(host){
+    resultsEl.innerHTML = "";
+    var text = $("q-paste").value.trim();
+    if (!text) { setStatus("请先粘贴印章数据串。", "bad"); return; }
+    /* 兼容粘贴完整 <script ...> 引入代码 */
+    var m = text.match(/data-seals?\s*=\s*(?:"([^"]*)"|'([^']*)')/);
+    var str = m ? (m[1] !== undefined ? m[1] : m[2]) : text;
+    str = str.replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+    var list = [];
+    if (str.trim().charAt(0) === "[") {
+      try { JSON.parse(str).forEach(function(x){
+        if (typeof x === "string") list.push(x);
+        else if (x && x.n) list.push(SP.b64e(JSON.stringify(x)));
+      }); } catch (e) {}
+    }
+    if (!list.length) list.push(str);
+
+    var n = 0;
+    list.forEach(function(s){ if (showSeal(s, host)) n++; });
+    if (n) {
+      if (host) {
+        setStatus("解析成功：共 " + n + " 枚印章，已按来源域名「" + host + "」完成核验，结果见下表。");
+      } else {
+        setStatus("解析成功：共 " + n + " 枚印章。数据未绑定运行环境，仅供参考；域名是否相符请以「按域名查验」结果为准。");
+      }
+    }
+    else setStatus("无法解析这串数据：不是有效的印章数据串。", "bad");
+  }
+
+  $("btn-query").addEventListener("click", function(){ queryDomain($("q-domain").value); });
+  $("q-domain").addEventListener("keydown", function(e){ if (e.key === "Enter") queryDomain(this.value); });
+  $("btn-parse").addEventListener("click", function(){ parsePaste(); });
+
+  /* ---------- URL 参数自动执行 ----------
+     ?s=数据串            → 粘贴模式直接解析
+     ?d=域名              → 按域名抓取查验
+     ?d=域名&s=数据串     → 印章「验真」角标入口：直接按来源域名即时核验 */
+  window.addEventListener("load", function(){
+    var p = new URLSearchParams(location.search);
+    var s = p.get("s"), d = p.get("d");
+    if (s) {
+      switchTab("paste");
+      $("q-paste").value = s;
+      var host;
+      if (d) {
+        host = cleanHost(d);
+        $("q-domain").value = host;
+      }
+      parsePaste(host);
+    } else if (d) {
+      $("q-domain").value = cleanHost(d);
+      queryDomain(d);
+    }
+  });
+})();
+</script>
+</body>
+</html>
