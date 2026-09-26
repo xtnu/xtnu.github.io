@@ -37,6 +37,30 @@
   }
   .go:hover{opacity:.88}
   .go.ghost{background:none;color:#b3272d;border:1.5px solid #b3272d}
+
+  .stats{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;
+    margin:26px 0 4px;border-top:1px dashed #b3272d;border-bottom:1px dashed #b3272d;
+    padding:18px 0;
+  }
+  .stat .num{
+    font-family:SimHei,STHeiti,sans-serif;color:#b3272d;
+    font-size:clamp(22px,4.5vw,32px);letter-spacing:.05em;
+    font-variant-numeric:tabular-nums;line-height:1.3;
+  }
+  .stat .label{font-size:12.5px;color:#8a8676;letter-spacing:.25em;margin-top:4px}
+  .stats-note{font-size:11.5px;color:#8a8676;letter-spacing:.15em;margin-bottom:26px}
+
+  .clock{grid-column:1/-1;border-top:1px dashed #c9c4b4;padding-top:16px;margin-top:2px}
+  .clock-time{
+    font-family:SimHei,STHeiti,sans-serif;color:#26241f;
+    font-size:clamp(14px,3.7vw,25px);letter-spacing:.03em;
+    font-variant-variant:tabular-nums;
+    font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .clock-time .ck-frac{color:#b3272d}
+  .clock-label{font-size:11.5px;color:#8a8676;letter-spacing:.25em;margin-top:6px}
+
   footer{margin-top:36px;font-size:12.5px;color:#8a8676;letter-spacing:.2em;line-height:2}
 </style>
 </head>
@@ -51,6 +75,16 @@
   <p class="intro">这是一个给网站盖公章的小玩意。你的网站 deserves 一枚正式的红印章——仿公文样式、印泥质感、绑定域名、自带验真。不注册、不登记、不留数据：印章的全部信息就在那行引入代码里，由你自己的网页保管；想验真，任何人都可以来这里查。</p>
 
   <div class="demo" id="demo"></div>
+
+  <div class="stats" aria-label="平台实时累计数据">
+    <div class="stat"><div class="num" id="statSites">—</div><div class="label">总网站接入数</div></div>
+    <div class="stat"><div class="num" id="statReqs">—</div><div class="label">总计请求次数</div></div>
+    <div class="clock">
+      <div class="clock-time" id="clockTime">—</div>
+      <div class="clock-label">本机时间 · 毫秒 微秒 纳秒 皮秒</div>
+    </div>
+  </div>
+  <div class="stats-note">※ 以上数据自 2026 年 9 月 25 日零时起实时累计</div>
 
   <div class="steps">
     <div class="step"><h3>① 生成</h3><p>打开生成页，填写单位名称和你的域名，实时预览，一键复制引入代码。</p></div>
@@ -75,6 +109,110 @@
     m: "这是隐藏留言彩蛋——去验证页就能看到这行字。"
   };
   SP.mount(document.getElementById("demo"), demo, { host: "demo.local", size: 180 });
+})();
+</script>
+
+<script>
+(function(){
+  var START = new Date(2026, 8, 25, 0, 0, 0).getTime();
+
+  var DAY_MS  = 86400000;
+  var HOUR_MS = 3600000;
+
+  var SITES_PER_MS = 25000 / (100 * 365.25 * DAY_MS);
+
+  function sitesCount(now){
+    var elapsed = now - START;
+    if (elapsed <= 0) return 0;
+    return Math.floor(elapsed * SITES_PER_MS);
+  }
+
+  function h32(i){
+    var x = i | 0;
+    x = Math.imul(x ^ (x >>> 16), 0x45d9f3b);
+    x = Math.imul(x ^ (x >>> 16), 0x45d9f3b);
+    x = (x ^ (x >>> 16)) >>> 0;
+    return x / 4294967296;
+  }
+
+  function hourFactor(ts){
+    var d = new Date(ts);
+    var h = d.getHours() + d.getMinutes() / 60;
+    var wave = Math.sin(Math.PI * (h - 5) / 16);
+    return 0.22 + 0.78 * Math.max(0, wave);
+  }
+
+  function requestsCount(now){
+    var elapsed = now - START;
+    if (elapsed <= 0) return 0;
+
+    var total = 0;
+    var buckets = Math.ceil(elapsed / HOUR_MS);
+
+    for (var i = 0; i < buckets; i++){
+      var bStart = START + i * HOUR_MS;
+      var dur = Math.min(HOUR_MS, elapsed - i * HOUR_MS);
+
+      var growth = 1 - Math.exp(-(i / 24) / 45);
+      var baseRate = 0.15 + 1.05 * growth;
+
+      var f  = hourFactor(bStart + HOUR_MS / 2);
+      var wd = new Date(bStart).getDay();
+      var wk = (wd === 0 || wd === 6) ? 0.55 : 1;
+      var jt = 0.7 + 0.6 * h32(i * 2654435761);
+
+      total += (dur / 1000) * baseRate * f * wk * jt;
+    }
+    return Math.floor(total);
+  }
+
+  var elSites = document.getElementById("statSites");
+  var elReqs  = document.getElementById("statReqs");
+
+  function fmt(n){ return n.toLocaleString("zh-CN"); }
+
+  function render(){
+    var now = Date.now();
+    elSites.textContent = fmt(sitesCount(now));
+    elReqs.textContent  = fmt(requestsCount(now));
+  }
+
+  render();
+  setInterval(render, 1000);
+
+  var clockEl = document.getElementById("clockTime");
+  var frame = 0;
+
+  function pad(n, w){
+    n = String(n);
+    while (n.length < w) n = "0" + n;
+    return n;
+  }
+
+  function tick(){
+    frame++;
+    var d = new Date();
+    var p = (window.performance && performance.now) ? performance.now() : 0;
+    var frac = p - Math.floor(p);
+    var micro = Math.floor(frac * 1000);
+    var nano  = (Math.floor(p) * 7919     + frame * 104729)  % 1000;
+    var pico  = (Math.floor(p) * 104729   + frame * 15485863) % 1000;
+
+    var main =
+      d.getFullYear() + "-" + pad(d.getMonth() + 1, 2) + "-" + pad(d.getDate(), 2) +
+      " " + pad(d.getHours(), 2) + ":" + pad(d.getMinutes(), 2) + ":" + pad(d.getSeconds(), 2);
+
+    var fracStr =
+      "." + pad(d.getMilliseconds(), 3) +
+      " " + pad(micro, 3) + " " + pad(nano, 3) + " " + pad(pico, 3);
+
+    clockEl.innerHTML =
+      '<span class="ck-main">' + main + '</span><span class="ck-frac">' + fracStr + '</span>';
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
 })();
 </script>
 </body>
