@@ -94,9 +94,10 @@
                 <button type="button" class="a11y-btn" id="fontLarge" title="放大字体">A+</button>
                 <span class="a11y-sep"></span>
                 <button type="button" class="a11y-btn" id="contrastBtn" title="切换高对比度">高对比度</button>
+                <button type="button" class="a11y-btn" id="speechBtn" aria-pressed="false" title="朗读页面主要内容">开始朗读</button>
                 <button type="button" class="a11y-btn" id="printBtn" title="打印本页">打印本页</button>
             </div>
-            <div class="a11y-stat">
+            <div class="a11y-stat" id="speechStatus" role="status" aria-live="polite">
                 本站已启用无障碍浏览辅助功能
             </div>
         </div>
@@ -579,6 +580,87 @@
             // 打印本页
             var pb = document.getElementById('printBtn');
             if (pb) pb.onclick = function () { window.print(); };
+            // Web Speech API 页面朗读（朗读主内容，分段以兼容长文本）
+            var speechBtn = document.getElementById('speechBtn');
+            var speechStatus = document.getElementById('speechStatus');
+            var speechSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+            var speechChunks = [];
+            var speechIndex = 0;
+            var isSpeaking = false;
+
+            function finishReading(message) {
+                isSpeaking = false;
+                speechBtn.textContent = '开始朗读';
+                speechBtn.setAttribute('aria-pressed', 'false');
+                if (message) speechStatus.textContent = message;
+            }
+
+            function speakNextChunk() {
+                if (!isSpeaking) return;
+                if (speechIndex >= speechChunks.length) {
+                    finishReading('朗读完成。');
+                    return;
+                }
+                var utterance = new SpeechSynthesisUtterance(speechChunks[speechIndex++]);
+                utterance.lang = 'zh-CN';
+                var voices = window.speechSynthesis.getVoices();
+                var chineseVoice = voices.find(function (voice) { return /^zh(-|_)?cn$/i.test(voice.lang); }) ||
+                    voices.find(function (voice) { return /^zh/i.test(voice.lang); });
+                if (chineseVoice) utterance.voice = chineseVoice;
+                utterance.onend = speakNextChunk;
+                utterance.onerror = function () {
+                    if (isSpeaking) finishReading('朗读发生错误，请重试。');
+                };
+                window.speechSynthesis.speak(utterance);
+            }
+
+            if (speechBtn) {
+                if (!speechSupported) {
+                    speechBtn.disabled = true;
+                    speechBtn.title = '当前浏览器不支持语音朗读';
+                    speechStatus.textContent = '当前浏览器不支持语音朗读';
+                } else {
+                    speechBtn.onclick = function () {
+                        if (isSpeaking) {
+                            isSpeaking = false;
+                            window.speechSynthesis.cancel();
+                            finishReading('朗读已停止。');
+                            return;
+                        }
+                        var mainContent = document.querySelector('main');
+                        var text = mainContent ? mainContent.innerText : '';
+                        text = text.replace(/\s+/g, ' ').trim();
+                        if (!text) {
+                            speechStatus.textContent = '没有可朗读的页面内容。';
+                            return;
+                        }
+                        // 以句子为单位合并，避免单次朗读文本过长。
+                        var sentences = text.match(/[^。！？；.!?]+[。！？；.!?]?/g) || [text];
+                        speechChunks = [];
+                        var chunk = '';
+                        sentences.forEach(function (sentence) {
+                            sentence = sentence.trim();
+                            while (sentence.length > 220) {
+                                if (chunk) { speechChunks.push(chunk); chunk = ''; }
+                                speechChunks.push(sentence.slice(0, 220));
+                                sentence = sentence.slice(220);
+                            }
+                            if (chunk && chunk.length + sentence.length > 220) {
+                                speechChunks.push(chunk);
+                                chunk = '';
+                            }
+                            chunk += sentence;
+                        });
+                        if (chunk) speechChunks.push(chunk);
+                        speechIndex = 0;
+                        isSpeaking = true;
+                        speechBtn.textContent = '停止朗读';
+                        speechBtn.setAttribute('aria-pressed', 'true');
+                        speechStatus.textContent = '正在朗读页面主要内容。';
+                        speakNextChunk();
+                    };
+                }
+            }
         })();
 
         // =====================================================
