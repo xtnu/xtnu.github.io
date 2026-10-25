@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>喃控远程配置工具</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #666666;
+    --border: #cccccc;
+    --panel: #f5f5f5;
+    --accent: #2e2e2e;
+    --accent-fg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+  main { max-width: 1000px; margin: 0 auto; padding: 20px 24px 40px; }
+  section { margin-bottom: 18px; }
+  label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--muted); }
+  input[type="text"], textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: ui-monospace, "SFMono-Regular", Consolas, "Courier New", monospace;
+    color: var(--fg);
+    background: var(--bg);
+  }
+  textarea { min-height: 420px; resize: vertical; line-height: 1.5; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .row input[type="text"] { flex: 1; min-width: 240px; }
+  button {
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--accent-fg);
+    padding: 9px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button.ghost { background: var(--bg); color: var(--fg); }
+  button:hover { opacity: 0.88; }
+  #status {
+    min-height: 20px;
+    font-size: 13px;
+    color: var(--muted);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  #status.err { color: #b00020; }
+  #status.ok { color: #1e7a1e; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .panel {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px;
+    background: var(--bg);
+    max-height: 520px;
+    overflow: auto;
+  }
+  .panel h3 { margin: 0 0 8px; font-size: 14px; }
+  .block { border-bottom: 1px solid var(--border); padding: 8px 0; }
+  .block:last-child { border-bottom: none; }
+  .block .t { font-weight: 600; font-size: 14px; }
+  .block .m { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .block .btn { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .tag {
+    display: inline-block;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0 6px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: 6px;
+  }
+  hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>喃控远程配置工具</h1>
+  <p>编辑 <code>data.json</code>：远程头像/名称/介绍、更新检测、公告、隐私协议。校验通过后导出或复制到服务器。</p>
+</header>
+
+<main>
+  <section>
+    <label for="url">远程配置地址（data.json 直链）</label>
+    <div class="row">
+      <input type="text" id="url" value="http://www.521567.xyz/app/api/nankong/data.json">
+      <button id="btnFetch">读取远程</button>
+      <button id="btnUpload" class="ghost">上传 JSON 文件</button>
+      <input type="file" id="file" accept=".json,application/json" style="display:none">
+    </div>
+  </section>
+
+  <section>
+    <div id="status">就绪。可读取远程、上传文件，或直接编辑下方 JSON。</div>
+  </section>
+
+  <section class="cols">
+    <div>
+      <label for="editor">JSON 编辑区</label>
+      <textarea id="editor" spellcheck="false"></textarea>
+    </div>
+    <div>
+      <label>实时预览</label>
+      <div class="panel" id="preview"><em style="color:var(--muted)">解析后在此预览各内容块。</em></div>
+    </div>
+  </section>
+
+  <section class="row">
+    <button id="btnValidate">校验 JSON</button>
+    <button id="btnPreview" class="ghost">刷新预览</button>
+    <button id="btnExport" class="ghost">导出 data.json</button>
+    <button id="btnCopy" class="ghost">复制到剪贴板</button>
+  </section>
+
+  <hr>
+  <section style="font-size:12px;color:var(--muted)">
+    <p><strong>字段说明：</strong>以 <code>_</code> 开头的键为注释，软件不读取。版本号用 <code>X.Y.Z</code> 格式。<code>frequency</code> 三选一：<code>every_launch</code> / <code>once</code> / <code>daily</code>。<code>notices</code> 为公告数组，<code>priority</code> 数字越大越优先展示。<code>buttons</code> 每项 <code>text</code> 为按钮文字、<code>url</code> 为空表示关闭按钮。</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var DEFAULT_TEMPLATE = {
+    "config_version": 1,
+    "profile": {
+      "avatar_url": "",
+      "name": "",
+      "intro": "",
+      "homepage_url": ""
+    },
+    "update": {
+      "enable": true,
+      "latest_version": "1.7.9",
+      "version_name": "",
+      "changelog": "",
+      "download_url": "",
+      "force_update": false,
+      "release_date": ""
+    },
+    "privacy_policy": {
+      "enable": true,
+      "id": 1,
+      "title": "隐私政策",
+      "content": "<p>在此填写隐私协议正文（HTML 格式，支持换行、图片、链接）。</p>",
+      "agree_text": "同意并继续",
+      "disagree_text": "不同意"
+    },
+    "notices": [
+      {
+        "enable": true,
+        "id": 1,
+        "priority": 100,
+        "title": "公告标题",
+        "content": "<p>在此填写公告正文（HTML 格式）。</p>",
+        "frequency": "once",
+        "start_date": "",
+        "end_date": "",
+        "buttons": [
+          { "text": "知道了", "url": "" }
+        ]
+      }
+    ]
+  };
+
+  var editor = document.getElementById("editor");
+  var statusEl = document.getElementById("status");
+  var previewEl = document.getElementById("preview");
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text;
+    statusEl.className = cls || "";
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function parse() {
+    try {
+      return JSON.parse(editor.value);
+    } catch (e) {
+      setStatus("JSON 解析失败：" + e.message, "err");
+      return null;
+    }
+  }
+
+  function renderPreview(data) {
+    if (!data) return;
+    var html = "";
+    // profile
+    var p = data.profile || {};
+    html += '<div class="block"><span class="t">我的页面</span>' +
+      '<div class="m">名称：' + esc(p.name || "-") + '</div>' +
+      '<div class="m">介绍：' + esc(p.intro || "-") + '</div>' +
+      '<div class="m">头像：' + esc(p.avatar_url || "-") + '</div></div>';
+    // update
+    var u = data.update || {};
+    html += '<div class="block"><span class="t">更新</span>' +
+      (u.force_update ? '<span class="tag">强制更新</span>' : '') +
+      '<div class="m">版本：' + esc(u.latest_version || "-") + (u.version_name ? "（" + esc(u.version_name) + "）" : "") + '</div>' +
+      '<div class="m">日期：' + esc(u.release_date || "-") + '</div>' +
+      '<div class="m">下载：' + esc(u.download_url || "-") + '</div></div>';
+    // privacy
+    var pp = data.privacy_policy || {};
+    html += '<div class="block"><span class="t">隐私协议</span>' +
+      (pp.enable === false ? '<span class="tag">已关闭</span>' : '') +
+      '<div class="m">标题：' + esc(pp.title || "-") + '（id=' + esc(pp.id) + '）</div></div>';
+    // notices
+    var notices = data.notices || [];
+    html += '<div class="block"><span class="t">公告</span><span class="tag">共 ' + notices.length + ' 条</span></div>';
+    notices.forEach(function (n, i) {
+      html += '<div class="block"><span class="t">' + (i + 1) + '. ' + esc(n.title || "(无标题)") + '</span>' +
+        '<span class="tag">优先级 ' + esc(n.priority) + '</span>' +
+        (n.enable === false ? '<span class="tag">已关闭</span>' : '') +
+        '<div class="m">频率：' + esc(n.frequency || "every_launch") + ' · 日期：' + esc(n.start_date || "-") + ' ~ ' + esc(n.end_date || "-") + '</div>' +
+        '<div class="btn">按钮：' + (n.buttons || []).map(function (b) { return esc(b.text) + (b.url ? "(链接)" : "(关闭)"); }).join("、") + '</div></div>';
+    });
+    previewEl.innerHTML = html;
+  }
+
+  function loadText(text) {
+    editor.value = text;
+    var data = parse();
+    if (data) {
+      setStatus("已加载，共 " + Object.keys(data).filter(function (k) { return k.charAt(0) !== "_"; }).length + " 个内容块。", "ok");
+      renderPreview(data);
+    }
+  }
+
+  // 初始化：填入默认模板
+  editor.value = JSON.stringify(DEFAULT_TEMPLATE, null, 2);
+
+  // 读取远程
+  document.getElementById("btnFetch").addEventListener("click", function () {
+    var url = document.getElementById("url").value.trim();
+    if (!url) { setStatus("请填写远程配置地址。", "err"); return; }
+    var ts = url + (url.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now();
+    setStatus("正在读取远程配置…");
+    fetch(ts, { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.text();
+      })
+      .then(function (text) { loadText(text); })
+      .catch(function (e) {
+        setStatus("远程读取失败（可能是跨域或网络限制，可改用上传文件或手动粘贴）：" + e.message, "err");
+      });
+  });
+
+  // 上传文件
+  document.getElementById("btnUpload").addEventListener("click", function () {
+    document.getElementById("file").click();
+  });
+  document.getElementById("file").addEventListener("change", function (ev) {
+    var f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () { loadText(String(reader.result || "")); };
+    reader.onerror = function () { setStatus("读取文件失败。", "err"); };
+    reader.readAsText(f, "utf-8");
+    ev.target.value = "";
+  });
+
+  // 校验
+  document.getElementById("btnValidate").addEventListener("click", function () {
+    var data = parse();
+    if (data) {
+      var ver = data.update && data.update.latest_version;
+      var verOk = ver && /^\d+(\.\d+){1,2}$/.test(String(ver));
+      setStatus(verOk ? "JSON 合法。版本号 " + ver + " 格式正确。" : "JSON 合法（注意：update.latest_version 建议使用 X.Y.Z 格式）。", "ok");
+      renderPreview(data);
+    }
+  });
+
+  // 刷新预览
+  document.getElementById("btnPreview").addEventListener("click", function () {
+    renderPreview(parse());
+  });
+
+  // 导出
+  document.getElementById("btnExport").addEventListener("click", function () {
+    var data = parse();
+    if (!data) return;
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "data.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    setStatus("已导出 data.json。", "ok");
+  });
+
+  // 复制到剪贴板
+  document.getElementById("btnCopy").addEventListener("click", function () {
+    var data = parse();
+    if (!data) return;
+    var text = JSON.stringify(data, null, 2);
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      setStatus(ok ? "已复制到剪贴板。" : "复制失败，请手动复制。", ok ? "ok" : "err");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        setStatus("已复制到剪贴板。", "ok");
+      }, fallback);
+    } else {
+      fallback();
+    }
+  });
+
+  // 编辑器输入时实时预览（防抖）
+  var timer = null;
+  editor.addEventListener("input", function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () { renderPreview(parse()); }, 400);
+  });
+})();
+</script>
+</body>
+</html>
