@@ -1,7 +1,6 @@
 {
   "_comment": "喃控（NanKong）远程配置文件。托管于 http://www.521567.xyz/app/api/nankong/data.json。所有以 _ 开头的键为注释，软件不读取。",
   "config_version": 1,
-
   "_comment_profile": "我的页面：头像、名称、介绍、主页（留空则使用软件内置默认值）",
   "profile": {
     "avatar_url": "https://www.521567.xyz/static/img/logo.png",
@@ -9,18 +8,16 @@
     "intro": "Android 远程控制 · ADB 授权 · 应用管理",
     "homepage_url": "https://www.521567.xyz/app/nankong/"
   },
-
   "_comment_update": "更新检测：latest_version 与软件自身版本号按 X.Y.Z 逐段比较，线上更高则弹更新弹窗",
   "update": {
     "enable": true,
-    "latest_version": "1.7.9",
+    "latest_version": "1.8.0",
     "version_name": "",
     "changelog": "1. 新增我的页面（头像/名称/介绍/版本信息）\n2. 新增远程公告系统（多公告、优先级、自定义按钮）\n3. 新增隐私协议与更新检测",
     "download_url": "https://www.521567.xyz/app/nankong/releases/",
     "force_update": false,
     "release_date": "2026-10-25"
   },
-
   "_comment_privacy_policy": "隐私协议：首次启动展示，同意后不再弹出；修改协议内容后把 id 加 1 可让用户重新确认",
   "privacy_policy": {
     "enable": true,
@@ -30,11 +27,10 @@
     "agree_text": "同意并继续",
     "disagree_text": "不同意"
   },
-
   "_comment_notices": "公告数组：可配置多条，独立开关，同时开启时按 priority 数字从大到小串行弹出。frequency 三选一：every_launch / once / daily。buttons 每项 url 为空表示关闭按钮，非空表示点击跳转浏览器",
   "notices": [
     {
-      "enable": true,
+      "enable": false,
       "id": 1,
       "priority": 100,
       "title": "用户协议",
@@ -43,12 +39,18 @@
       "start_date": "",
       "end_date": "",
       "buttons": [
-        { "text": "同意", "url": "" },
-        { "text": "查看完整协议", "url": "https://www.521567.xyz/app/nankong/agreement/" }
+        {
+          "text": "同意",
+          "url": ""
+        },
+        {
+          "text": "查看完整协议",
+          "url": "https://www.521567.xyz/app/nankong/agreement/"
+        }
       ]
     },
     {
-      "enable": true,
+      "enable": false,
       "id": 1,
       "priority": 50,
       "title": "新功能上线",
@@ -57,7 +59,10 @@
       "start_date": "",
       "end_date": "",
       "buttons": [
-        { "text": "知道了", "url": "" }
+        {
+          "text": "知道了",
+          "url": ""
+        }
       ]
     }
   ]
