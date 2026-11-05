@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xtn 二维码工坊</title>
+<style>
+:root{
+  --red:#8f2a1c; --red-dark:#74200f;
+  --ink:#3a342e; --sub:#8a837a;
+  --line:#e3ded8; --bd:#d8d2c8;
+  --bg:#f5f3f0; --card:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+  padding:28px 16px 60px}
+.wrap{max-width:960px;margin:0 auto}
+
+/* ===== 页签 ===== */
+.tabs{display:flex;border-bottom:3px solid var(--red)}
+.tab{padding:16px 26px;font-weight:800;font-size:17px;background:#fff;
+  color:var(--ink);border:1px solid var(--line);border-bottom:none;cursor:pointer;user-select:none}
+.tab.active{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* ===== 卡片 ===== */
+.card{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:2px}
+.card-inner{padding:26px}
+h1{font-size:22px;font-weight:900;display:flex;align-items:center;gap:9px}
+.sq{width:13px;height:13px;background:var(--red);flex:none}
+.desc{margin:14px 0 4px;line-height:1.9;color:var(--ink);font-size:15px}
+.desc b{font-weight:800}
+.divider{height:1px;background:var(--line);margin:16px 0 22px}
+
+.grid{display:grid;grid-template-columns:1fr 340px;gap:34px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+
+/* ===== 表单 ===== */
+.seg{display:flex;flex-wrap:wrap;border:1px solid var(--bd);border-radius:4px;overflow:hidden}
+.seg button{flex:1 1 auto;min-width:64px;padding:10px 4px;background:#fff;border:none;
+  border-right:1px solid var(--bd);font-weight:700;font-size:13.5px;color:var(--ink);cursor:pointer;font-family:inherit}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--red);color:#fff}
+.fields{display:none;margin-top:16px}
+.fields.on{display:block}
+
+.lab-row{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 7px}
+.lab-row:first-child{margin-top:0}
+.lab{font-weight:800;font-size:14px}
+.lab-val{color:var(--sub);font-weight:600;font-size:14px}
+input[type=text],input[type=number],select,textarea{
+  width:100%;padding:11px 12px;border:1px solid var(--bd);border-radius:4px;
+  font-size:15px;font-family:inherit;color:var(--ink);background:#fff;outline:none}
+textarea{resize:vertical;min-height:76px}
+input:focus,select:focus,textarea:focus{border-color:var(--red)}
+select{appearance:auto}
+input[type=range]{width:100%;accent-color:var(--red)}
+input[type=color]{width:46px;height:34px;border:1px solid var(--bd);border-radius:4px;background:#fff;padding:2px;cursor:pointer}
+.row{display:flex;gap:12px;align-items:center}
+.row .grow{flex:1}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none}
+.check input{accent-color:var(--red);width:16px;height:16px}
+.hint{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.7}
+
+/* 上传区 */
+.drop{border:1.5px dashed #c9c2b8;border-radius:6px;padding:26px 16px;text-align:center;cursor:pointer;background:#faf9f7}
+.drop:hover{border-color:var(--red)}
+.drop .up{font-size:26px;color:#a89f92}
+.drop .t1{font-weight:800;margin-top:6px}
+.drop .t2{color:var(--sub);font-size:13px;margin-top:4px}
+.logo-preview{display:flex;align-items:center;gap:10px;margin-top:10px}
+.logo-preview img{width:44px;height:44px;object-fit:contain;border:1px solid var(--line);border-radius:4px;background:#fff}
+
+/* 预设 */
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.preset{padding:7px 13px;border:1px solid var(--bd);border-radius:4px;background:#fff;
+  font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);display:flex;align-items:center;gap:7px;font-family:inherit}
+.preset:hover{border-color:var(--red)}
+.preset i{width:14px;height:14px;border-radius:3px;display:inline-block}
+
+/* ===== 预览 ===== */
+.preview-box{border:1px solid var(--line);border-radius:4px;padding:14px;background:#faf9f7;position:relative}
+#cv{width:100%;display:block;border-radius:2px}
+#ph{position:absolute;inset:14px;display:flex;align-items:center;justify-content:center;
+  color:var(--sub);font-weight:700;font-size:14px;background:#faf9f7;text-align:center;padding:20px}
+#ph.off{display:none}
+.stats{margin-top:12px;font-size:13px;color:var(--sub);font-weight:600;line-height:1.8;
+  border:1px solid var(--line);border-radius:4px;padding:10px 12px;background:#fff}
+.btns{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn{flex:1;padding:13px 10px;font-weight:800;font-size:15px;border-radius:4px;cursor:pointer;
+  font-family:inherit;border:1px solid var(--bd);background:#fff;color:var(--ink);white-space:nowrap}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.btn.primary:hover{background:var(--red-dark)}
+.btn:hover:not(.primary){border-color:var(--red)}
+
+.foot{margin-top:22px;font-size:13px;color:var(--sub);font-weight:600;display:flex;align-items:center;gap:8px}
+.foot .sq{width:10px;height:10px}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);
+  background:#2f2a24;color:#fff;padding:11px 20px;border-radius:4px;font-size:14px;font-weight:600;
+  opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:86vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  
+
+  
+
+
+    <div class="grid">
+      <!-- ============ 左：表单 ============ -->
+      <div>
+        <div class="seg" id="typeSeg">
+          <button data-type="url" class="on">网址</button>
+          <button data-type="text">文本</button>
+          <button data-type="wifi">WiFi</button>
+          <button data-type="vcard">名片</button>
+          <button data-type="email">邮件</button>
+          <button data-type="tel">电话</button>
+          <button data-type="sms">短信</button>
+        </div>
+
+        <div class="fields on" data-type="url">
+          <div class="lab-row"><span class="lab">网址链接</span></div>
+          <input type="text" id="f-url" placeholder="https://example.com" data-persist>
+        </div>
+
+        <div class="fields" data-type="text">
+          <div class="lab-row"><span class="lab">文本内容</span></div>
+          <textarea id="f-text" placeholder="输入任意文字…" data-persist></textarea>
+        </div>
+
+        <div class="fields" data-type="wifi">
+          <div class="lab-row"><span class="lab">WiFi 名称（SSID）</span></div>
+          <input type="text" id="f-wifi-ssid" data-persist>
+          <div class="lab-row"><span class="lab">密码</span></div>
+          <input type="text" id="f-wifi-pass" data-persist>
+          <div class="lab-row"><span class="lab">加密方式</span></div>
+          <select id="f-wifi-enc" data-persist>
+            <option value="WPA">WPA / WPA2 / WPA3</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">无密码（开放网络）</option>
+          </select>
+          <div class="lab-row"><label class="check"><input type="checkbox" id="f-wifi-hidden" data-persist> 隐藏网络</label></div>
+        </div>
+
+        <div class="fields" data-type="vcard">
+          <div class="lab-row"><span class="lab">姓名 *</span></div>
+          <input type="text" id="f-v-name" data-persist>
+          <div class="lab-row"><span class="lab">电话</span></div>
+          <input type="text" id="f-v-tel" data-persist>
+          <div class="lab-row"><span class="lab">邮箱</span></div>
+          <input type="text" id="f-v-email" data-persist>
+          <div class="lab-row"><span class="lab">公司 / 职位</span></div>
+          <div class="row">
+            <input type="text" id="f-v-org" class="grow" placeholder="公司" data-persist>
+            <input type="text" id="f-v-title" class="grow" placeholder="职位" data-persist>
+          </div>
+          <div class="lab-row"><span class="lab">网址</span></div>
+          <input type="text" id="f-v-url" data-persist>
+        </div>
+
+        <div class="fields" data-type="email">
+          <div class="lab-row"><span class="lab">收件邮箱 *</span></div>
+          <input type="text" id="f-e-to" data-persist>
+          <div class="lab-row"><span class="lab">主题</span></div>
+          <input type="text" id="f-e-sub" data-persist>
+          <div class="lab-row"><span class="lab">正文</span></div>
+          <textarea id="f-e-body" data-persist></textarea>
+        </div>
+
+        <div class="fields" data-type="tel">
+          <div class="lab-row"><span class="lab">电话号码 *</span></div>
+          <input type="text" id="f-tel" placeholder="+8613800000000" data-persist>
+        </div>
+
+        <div class="fields" data-type="sms">
+          <div class="lab-row"><span class="lab">接收号码 *</span></div>
+          <input type="text" id="f-sms-tel" data-persist>
+          <div class="lab-row"><span class="lab">短信内容</span></div>
+          <textarea id="f-sms-body" data-persist></textarea>
+        </div>
+
+        <!-- 样式 -->
+        <div class="divider"></div>
+
+        <div class="lab-row"><span class="lab">快速配色</span></div>
+        <div class="presets">
+          <button class="preset" data-p="classic"><i style="background:#1a1a1a"></i>经典黑白</button>
+          <button class="preset" data-p="tomato"><i style="background:linear-gradient(135deg,#8f2a1c,#d05a3a)"></i>番茄红</button>
+          <button class="preset" data-p="forest"><i style="background:linear-gradient(135deg,#14532d,#0d9488)"></i>墨绿青</button>
+          <button class="preset" data-p="ocean"><i style="background:linear-gradient(135deg,#1e3a8a,#0ea5e9)"></i>深海蓝</button>
+        </div>
+
+        <div class="lab-row"><span class="lab">前景色</span><label class="check"><input type="checkbox" id="o-grad" data-persist> 渐变</label></div>
+        <div class="row">
+          <input type="color" id="o-c1" value="#8f2a1c" data-persist>
+          <input type="color" id="o-c2" value="#d05a3a" data-persist>
+          <select id="o-gradDir" class="grow" data-persist>
+            <option value="d">对角渐变</option>
+            <option value="h">水平渐变</option>
+            <option value="v">垂直渐变</option>
+            <option value="r">径向渐变</option>
+          </select>
+        </div>
+
+        <div class="lab-row"><span class="lab">背景色</span><label class="check"><input type="checkbox" id="o-transp" data-persist> 透明背景</label></div>
+        <input type="color" id="o-bg" value="#ffffff" data-persist>
+
+        <div class="lab-row"><span class="lab">码点样式</span></div>
+        <select id="o-dot" data-persist>
+          <option value="square">方块（最稳）</option>
+          <option value="rounded" selected>圆角</option>
+          <option value="dot">圆点</option>
+          <option value="fluid">豆形</option>
+        </select>
+
+        <div class="lab-row"><span class="lab">定位眼样式</span></div>
+        <select id="o-eye" data-persist>
+          <option value="square">经典方块</option>
+          <option value="rounded" selected>圆角</option>
+          <option value="circle">圆形</option>
+          <option value="dot">圆点（外圆角 + 内圆）</option>
+        </select>
+
+        <div class="lab-row"><span class="lab">容错等级</span></div>
+        <select id="o-ecl" data-persist>
+          <option value="L">L · 7%（容量最大）</option>
+          <option value="M">M · 15%</option>
+          <option value="Q">Q · 25%</option>
+          <option value="H" selected>H · 30%（最稳，推荐）</option>
+        </select>
+
+        <div class="lab-row"><span class="lab">四周留白</span><span class="lab-val" id="v-margin">4 模块</span></div>
+        <input type="range" id="o-margin" min="0" max="8" value="4" data-persist>
+
+        <div class="lab-row"><span class="lab">中心 Logo</span></div>
+        <div class="drop" id="logoDrop">
+          <div class="up">⬆</div>
+          <div class="t1">点击选择 Logo 图片</div>
+          <div class="t2">PNG / JPG / SVG · 自动升级为 H 级容错</div>
+          <input type="file" id="logoFile" accept="image/*" hidden>
+        </div>
+        <div class="logo-preview" id="logoPrev" style="display:none">
+          <img id="logoImgEl" alt="">
+          <label class="check"><input type="checkbox" id="o-logoPad" checked data-persist> 白色衬底</label>
+          <div class="grow"></div>
+          <button class="btn" style="flex:none;padding:7px 14px;font-size:13px" id="logoClear">移除</button>
+        </div>
+        <div class="lab-row"><span class="lab">Logo 大小</span><span class="lab-val" id="v-logoScale">22%</span></div>
+        <input type="range" id="o-logoScale" min="10" max="35" value="22" data-persist>
+        <p class="hint">建议 Logo 不超过 25%，否则可能影响扫码；已自动使用 H 级容错兜底。</p>
+      </div>
+
+      <!-- ============ 右：预览 ============ -->
+      <div>
+        <div class="preview-box">
+          <canvas id="cv" width="640" height="640"></canvas>
+          <div id="ph">填写左侧内容后<br>二维码将在此自动生成</div>
+        </div>
+        <div class="stats" id="stats">等待输入…</div>
+
+        <div class="lab-row"><span class="lab">导出尺寸</span></div>
+        <select id="o-export" data-persist>
+          <option value="512">512 × 512</option>
+          <option value="1024" selected>1024 × 1024</option>
+          <option value="2048">2048 × 2048</option>
+          <option value="4096">4096 × 4096</option>
+        </select>
+
+        <div class="btns">
+          <button class="btn primary" id="dlPng">下载 PNG</button>
+          <button class="btn" id="dlSvg">下载 SVG</button>
+          <button class="btn" id="copyImg">复制图片</button>
+        </div>
+      </div>   <!-- 右列 -->
+    </div>     <!-- .grid -->
+
+    
+       <div class="foot"><span class="sq"></span>纯本地运行 · 可离线保存本页使用 · 设置自动记忆</div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ================================================================
+ *  QR 编码内核（Byte 模式，Version 1–40，基于 ISO/IEC 18004）
+ * ================================================================ */
+const ECC_CW = { // 每块纠错码字数
+  L:[-1,7,10,15,20,26,18,20,24,30,18,20,24,26,30,22,24,28,30,28,28,28,28,30,30,26,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+  M:[-1,10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28],
+  Q:[-1,13,22,18,26,18,24,18,22,20,24,28,26,24,20,30,24,28,28,26,30,28,30,30,30,30,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30],
+  H:[-1,17,28,22,16,22,28,26,26,24,28,24,28,22,24,24,30,28,28,26,28,30,24,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]};
+const EC_BLOCKS = { // 纠错块数
+  L:[-1,1,1,1,1,1,2,2,2,2,4,4,4,4,4,6,6,6,6,7,8,8,9,9,10,12,12,12,13,14,15,16,17,18,19,19,20,21,22,24,25],
+  M:[-1,1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49],
+  Q:[-1,1,1,2,2,4,4,6,6,8,8,8,10,12,16,12,17,16,18,21,20,23,23,25,27,29,34,34,35,38,40,43,45,48,51,53,56,59,62,65,68],
+  H:[-1,1,1,2,4,4,4,5,6,8,8,11,11,16,16,18,16,19,21,25,25,25,34,30,32,35,37,40,42,45,48,51,54,57,60,63,66,70,74,77,81]};
+const ECC_FMT = {L:1, M:0, Q:3, H:2};
+
+function getNumRaw(ver){
+  let r = (16*ver+128)*ver + 64;
+  if (ver >= 2){
+    const na = Math.floor(ver/7)+2;
+    r -= (25*na-10)*na - 55;
+    if (ver >= 7) r -= 36;
+  }
+  return r;
+}
+const getNumData = (ver, ecl) =>
+  Math.floor(getNumRaw(ver)/8) - ECC_CW[ecl][ver]*EC_BLOCKS[ecl][ver];
+
+function gfMul(x,y){
+  let z=0;
+  for(let i=7;i>=0;i--){ z=(z<<1)^((z>>>7)*0x11D); z^=((y>>>i)&1)*x; }
+  return z;
+}
+function rsDivisor(deg){
+  const r=new Array(deg).fill(0); r[deg-1]=1; let root=1;
+  for(let i=0;i<deg;i++){
+    for(let j=0;j<deg;j++){ r[j]=gfMul(r[j],root); if(j+1<deg) r[j]^=r[j+1]; }
+    root=gfMul(root,2);
+  }
+  return r;
+}
+function rsRemainder(data,div){
+  const res=div.map(()=>0);
+  for(const b of data){
+    const f=b^res.shift(); res.push(0);
+    div.forEach((c,i)=>res[i]^=gfMul(c,f));
+  }
+  return res;
+}
+function addEcc(ver,ecl,data){
+  const nb=EC_BLOCKS[ecl][ver], el=ECC_CW[ecl][ver];
+  const raw=Math.floor(getNumRaw(ver)/8);
+  const ns=nb-raw%nb, sl=Math.floor(raw/nb);
+  const div=rsDivisor(el), blocks=[]; let k=0;
+  for(let i=0;i<nb;i++){
+    const dl=sl-el+(i<ns?0:1);
+    const dat=data.slice(k,k+dl); k+=dl;
+    const blk=dat.slice(); if(i<ns) blk.push(0);
+    blocks.push(blk.concat(rsRemainder(dat,div)));
+  }
+  const out=[];
+  for(let i=0;i<blocks[0].length;i++)
+    for(let j=0;j<nb;j++)
+      if(i!==sl-el || j>=ns) out.push(blocks[j][i]);
+  return out;
+}
+const MASKS=[
+  (x,y)=>(x+y)%2===0, (x,y)=>y%2===0, (x,y)=>x%3===0, (x,y)=>(x+y)%3===0,
+  (x,y)=>(Math.floor(x/3)+Math.floor(y/2))%2===0,
+  (x,y)=>(x*y)%2+(x*y)%3===0,
+  (x,y)=>((x*y)%2+(x*y)%3)%2===0,
+  (x,y)=>(((x+y)%2)+(x*y)%3)%2===0];
+
+function alignPos(ver,size){
+  if(ver===1) return [];
+  const n=Math.floor(ver/7)+2;
+  const step= ver===32?26: Math.ceil((ver*4+4)/(n*2-2))*2;
+  const res=[6];
+  for(let pos=size-7;res.length<n;pos-=step) res.splice(1,0,pos);
+  return res;
+}
+
+function qrGenerate(text, ecl){
+  const data=new TextEncoder().encode(text);
+  let ver=0;
+  for(let v=1;v<=40;v++){
+    const cap=getNumData(v,ecl)*8 - 4 - (v<10?8:16);
+    if(data.length*8<=cap){ver=v;break;}
+  }
+  if(!ver) throw new Error('内容太长，请缩短文字或降低容错等级');
+
+  const capBits=getNumData(ver,ecl)*8, bb=[];
+  const push=(val,len)=>{for(let i=len-1;i>=0;i--)bb.push((val>>>i)&1);};
+  push(4,4); push(data.length, ver<10?8:16);
+  for(const b of data) push(b,8);
+  push(0, Math.min(4, capBits-bb.length));
+  push(0, (8-bb.length%8)%8);
+  for(let pad=0xEC; bb.length<capBits; pad^=0xEC^0x11) push(pad,8);
+  const dcw=[];
+  for(let i=0;i<bb.length;i+=8){let b=0;for(let j=0;j<8;j++)b=(b<<1)|bb[i+j];dcw.push(b);}
+  const finalCw=addEcc(ver,ecl,dcw);
+
+  const size=ver*4+17;
+  const modules=Array.from({length:size},()=>new Array(size).fill(false));
+  const isFunc=Array.from({length:size},()=>new Array(size).fill(false));
+  const setF=(x,y,d)=>{modules[y][x]=d;isFunc[y][x]=true;};
+
+  for(let i=0;i<size;i++){setF(6,i,i%2===0);setF(i,6,i%2===0);}
+  const finder=(fx,fy)=>{
+    for(let dy=-1;dy<=7;dy++)for(let dx=-1;dx<=7;dx++){
+      const x=fx+dx,y=fy+dy;
+      if(x<0||x>=size||y<0||y>=size)continue;
+      setF(x,y, Math.max(Math.abs(dx-3),Math.abs(dy-3))!==2 &&
+                   Math.max(Math.abs(dx-3),Math.abs(dy-3))!==4);
+    }};
+  finder(0,0);finder(size-7,0);finder(0,size-7);
+  const ap=alignPos(ver,size);
+  for(let i=0;i<ap.length;i++)for(let j=0;j<ap.length;j++){
+    if((i===0&&j===0)||(i===0&&j===ap.length-1)||(i===ap.length-1&&j===0))continue;
+    const cx=ap[i],cy=ap[j];
+    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)
+      setF(cx+dx,cy+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1);
+  }
+  const drawFormat=mask=>{
+    const d=ECC_FMT[ecl]<<3|mask; let rem=d;
+    for(let i=0;i<10;i++) rem=(rem<<1)^((rem>>>9)*0x537);
+    const bits=((d<<10)|rem)^0x5412, bit=i=>((bits>>>i)&1)!==0;
+    for(let i=0;i<=5;i++)setF(8,i,bit(i));
+    setF(8,7,bit(6));setF(8,8,bit(7));setF(7,8,bit(8));
+    for(let i=9;i<15;i++)setF(14-i,8,bit(i));
+    for(let i=0;i<8;i++)setF(size-1-i,8,bit(i));
+    for(let i=8;i<15;i++)setF(8,size-15+i,bit(i));
+    setF(8,size-8,true);
+  };
+  if(ver>=7){
+    let rem=ver;
+    for(let i=0;i<12;i++) rem=(rem<<1)^((rem>>>11)*0x1F25);
+    const bits=(ver<<12)|rem, bit=i=>((bits>>>i)&1)!==0;
+    for(let i=0;i<18;i++){
+      const a=size-11+i%3, c=Math.floor(i/3);
+      setF(a,c,bit(i)); setF(c,a,bit(i));
+    }
+  }
+  // 数据放置（蛇形）
+  {
+    let i=0;
+    for(let right=size-1;right>=1;right-=2){
+      if(right===6)right=5;
+      for(let v2=0;v2<size;v2++)for(let j=0;j<2;j++){
+        const x=right-j;
+        const up=((right+1)&2)===0;
+        const y=up?size-1-v2:v2;
+        if(!isFunc[y][x] && i<finalCw.length*8){
+          modules[y][x]=((finalCw[i>>>3]>>>(7-(i&7)))&1)!==0; i++;
+        }
+      }
+    }
+  }
+  const applyMask=m=>{
+    for(let y=0;y<size;y++)for(let x=0;x<size;x++)
+      if(!isFunc[y][x]&&MASKS[m](x,y)) modules[y][x]=!modules[y][x];
+  };
+  const penalty=()=>{
+    let p=0;
+    const line=get=>{ // P1
+      for(let i=0;i<size;i++){
+        let color=get(i,0),run=1;
+        for(let j=1;j<size;j++){
+          const c=get(i,j);
+          if(c===color){run++;if(run===5)p+=3;else if(run>5)p++;}
+          else{color=c;run=1;}
+        }
+      }};
+    line((i,j)=>modules[j][i]); line((i,j)=>modules[i][j]);
+    for(let y=0;y<size-1;y++)for(let x=0;x<size-1;x++){ // P2
+      const c=modules[y][x];
+      if(c===modules[y][x+1]&&c===modules[y+1][x]&&c===modules[y+1][x+1])p+=3;
+    }
+    const pat=[1,0,1,1,1,0,1]; // P3
+    const scan=get=>{
+      for(let i=0;i<size;i++)for(let j=0;j+7<=size;j++){
+        let ok=true;
+        for(let k2=0;k2<7;k2++)if(get(i,j+k2)!==(pat[k2]===1)){ok=false;break;}
+        if(!ok)continue;
+        if(j>=4&&!get(i,j-1)&&!get(i,j-2)&&!get(i,j-3)&&!get(i,j-4))p+=40;
+        if(j+10<size&&!get(i,j+7)&&!get(i,j+8)&&!get(i,j+9)&&!get(i,j+10))p+=40;
+      }};
+    scan((i,j)=>modules[j][i]); scan((i,j)=>modules[i][j]);
+    let dark=0; // P4
+    for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(modules[y][x])dark++;
+    const k=Math.ceil(Math.abs(dark*20-size*size*10)/(size*size))-1;
+    return p+k*10;
+  };
+  let best=0,minP=Infinity;
+  for(let m=0;m<8;m++){
+    applyMask(m);drawFormat(m);
+    const p=penalty();
+    if(p<minP){minP=p;best=m;}
+    applyMask(m);
+  }
+  applyMask(best);drawFormat(best);
+  return {size, ver, mask:best, ecl,
+    get:(x,y)=>modules[y][x]};
+}
+
+/* ================================================================
+ *  渲染（Canvas + SVG 双输出）
+ * ================================================================ */
+function hex2rgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function lerpHex(a,b,t){
+  const A=hex2rgb(a),B=hex2rgb(b);
+  return `rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')})`;}
+function fgColorAt(p,opt,size){
+  if(!opt.grad) return opt.c1;
+  const cx=p.t==='c'?p.cx:p.x+p.w/2, cy=p.t==='c'?p.cy:p.y+p.h/2;
+  const total=size+opt.margin*2;
+  const nx=Math.min(1,Math.max(0,(cx+opt.margin)/total));
+  const ny=Math.min(1,Math.max(0,(cy+opt.margin)/total));
+  let t;
+  switch(opt.gradDir){
+    case 'v':t=ny;break; case 'h':t=nx;break;
+    case 'r':{const dx=nx-.5,dy=ny-.5;t=Math.min(1,Math.sqrt(dx*dx+dy*dy)*2);break;}
+    default:t=(nx+ny)/2;
+  }
+  return lerpHex(opt.c1,opt.c2,t);
+}
+function buildPrims(qr,opt){
+  const size=qr.size, prims=[];
+  const skip=Array.from({length:size},()=>new Array(size).fill(false));
+  const mark=(x0,y0)=>{for(let y=y0;y<y0+8;y++)for(let x=x0;x<x0+8;x++)
+    if(x<size&&y<size)skip[y][x]=true;};
+  mark(0,0);mark(size-8,0);mark(0,size-8);
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+    if(skip[y][x]||!qr.get(x,y))continue;
+    if(opt.dot==='square')prims.push({t:'r',x,y,w:1,h:1,rx:0});
+    else if(opt.dot==='rounded')prims.push({t:'r',x:x+.04,y:y+.04,w:.92,h:.92,rx:.3});
+    else if(opt.dot==='dot')prims.push({t:'c',cx:x+.5,cy:y+.5,r:.44});
+    else prims.push({t:'r',x:x+.02,y:y+.02,w:.96,h:.96,rx:.5});
+  }
+  const eye=(ex,ey)=>{
+    if(opt.eye==='square'){
+      prims.push({t:'r',x:ex+.5,y:ey+.5,w:6,h:6,rx:0,sw:1,fill:'none'});
+      prims.push({t:'r',x:ex+2,y:ey+2,w:3,h:3,rx:0});
+    }else if(opt.eye==='rounded'){
+      prims.push({t:'r',x:ex+.5,y:ey+.5,w:6,h:6,rx:1.8,sw:1,fill:'none'});
+      prims.push({t:'r',x:ex+2,y:ey+2,w:3,h:3,rx:1});
+    }else if(opt.eye==='circle'){
+      prims.push({t:'c',cx:ex+3.5,cy:ey+3.5,r:3,sw:1,fill:'none'});
+      prims.push({t:'c',cx:ex+3.5,cy:ey+3.5,r:1.5});
+    }else{
+      prims.push({t:'r',x:ex+.5,y:ey+.5,w:6,h:6,rx:2.6,sw:1,fill:'none'});
+      prims.push({t:'c',cx:ex+3.5,cy:ey+3.5,r:1.5});
+    }};
+  eye(0,0);eye(size-7,0);eye(0,size-7);
+  return prims;
+}
+function rr(ctx,x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  if(r<=0){ctx.rect(x,y,w,h);return;}
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function drawLogo(ctx,opt,size,u,px){
+  if(!opt.logoImg)return;
+  const w=size*opt.logoScale/100;
+  const x=size/2-w/2, pad=w*.08;
+  if(opt.logoPad){
+    ctx.fillStyle=opt.transparent?'#ffffff':opt.bg;
+    rr(ctx,x-pad,x-pad===0?0:x-pad,w+pad*2,w+pad*2,w*.18); // 修正 y
+    ctx.beginPath();
+    rr(ctx,x-pad,x-pad,w+pad*2,w+pad*2,w*.18);
+    ctx.fill();
+  }
+  ctx.drawImage(opt.logoImg,(x)*u+ (px/size)*0 ,(x)*u*0+0,0,0); // 占位（下一行真正绘制）
+  ctx.drawImage(opt.logoImg, x*u===0?x:x*0 + x, x, 0, 0);
+}
+
+/* —— 上面 drawLogo 复杂了，重写为干净版本 —— */
+function renderTo(canvas,qr,opt,px){
+  const size=qr.size,total=size+opt.margin*2,u=px/total;
+  canvas.width=px;canvas.height=px;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,px,px);
+  if(!opt.transparent){ctx.fillStyle=opt.bg;ctx.fillRect(0,0,px,px);}
+  const prims=buildPrims(qr,opt);
+  ctx.save();ctx.translate(opt.margin*u,opt.margin*u);ctx.scale(u,u);
+  for(const p of prims){
+    const col=p.fill==='none'?null:fgColorAt(p,opt,size);
+    ctx.lineWidth=p.sw||0;
+    if(p.t==='r'){rr(ctx,p.x,p.y,p.w,p.h,p.rx);}
+    else{ctx.beginPath();ctx.arc(p.cx,p.cy,p.r,0,Math.PI*2);}
+    if(p.sw){ctx.strokeStyle=col;ctx.stroke();}
+    else{ctx.fillStyle=col;ctx.fill();}
+  }
+  if(opt.logoImg){
+    const w=size*opt.logoScale/100, x=size/2-w/2, pad=w*.08;
+    if(opt.logoPad){
+      ctx.fillStyle=opt.transparent?'#ffffff':opt.bg;
+      ctx.beginPath();rr(ctx,x-pad,x-pad,w+pad*2,w+pad*2,w*.18);ctx.fill();
+    }
+    ctx.drawImage(opt.logoImg,x,x,w,w);
+  }
+  ctx.restore();
+}
+function buildSVG(qr,opt){
+  const size=qr.size,total=size+opt.margin*2,px=1024,u=px/total;
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${px}" height="${px}" viewBox="0 0 ${px} ${px}">`;
+  if(!opt.transparent)s+=`<rect width="${px}" height="${px}" fill="${opt.bg}"/>`;
+  for(const p of buildPrims(qr,opt)){
+    const col=p.fill==='none'?'none':fgColorAt(p,opt,size);
+    if(p.t==='r'){
+      s+=`<rect x="${((p.x+opt.margin)*u).toFixed(2)}" y="${((p.y+opt.margin)*u).toFixed(2)}" width="${(p.w*u).toFixed(2)}" height="${(p.h*u).toFixed(2)}" rx="${(p.rx*u).toFixed(2)}" fill="${col}"${p.sw?` stroke="${col}" stroke-width="${(p.sw*u).toFixed(2)}"`:''}/>`;
+    }else{
+      const st=p.sw?` fill="none" stroke="${col}" stroke-width="${(p.sw*u).toFixed(2)}"`:` fill="${col}"`;
+      s+=`<circle cx="${((p.cx+opt.margin)*u).toFixed(2)}" cy="${((p.cy+opt.margin)*u).toFixed(2)}" r="${(p.r*u).toFixed(2)}"${st}/>`;
+    }
+  }
+  if(opt.logoImg){
+    const w=size*opt.logoScale/100,x=(size/2-w/2+opt.margin)*u;
+    if(opt.logoPad){
+      const pad=w*.08*u;
+      s+=`<rect x="${x-pad}" y="${x-pad}" width="${w*u+pad*2}" height="${w*u+pad*2}" rx="${w*.18*u}" fill="${opt.transparent?'#ffffff':opt.bg}"/>`;
+    }
+    s+=`<image href="${opt.logoSrc}" xlink:href="${opt.logoSrc}" x="${x}" y="${x}" width="${(w*u).toFixed(2)}" height="${(w*u).toFixed(2)}"/>`;
+  }
+  return s+'</svg>';
+}
+
+/* ================================================================
+ *  界面逻辑
+ * ================================================================ */
+const $=id=>document.getElementById(id);
+const state={type:'url',logoSrc:null,logoImg:null,qr:null,opt:null};
+let regenTimer=null;
+
+function toast(msg){
+  const t=$('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400);
+}
+function escWifi(s){return s.replace(/([\\;,:"])/g,'\\$1');}
+
+function buildContent(){
+  const v=id=>$(id).value.trim();
+  switch(state.type){
+    case 'text':return v('f-text')||null;
+    case 'url':return v('f-url')||null;
+    case 'wifi':{
+      const s=v('f-wifi-ssid');if(!s)return null;
+      const e=$('f-wifi-enc').value,p=v('f-wifi-pass'),h=$('f-wifi-hidden').checked;
+      return `WIFI:T:${e};S:${escWifi(s)};${e!=='nopass'?`P:${escWifi(p)};`:''}${h?'H:true;':''};`;
+    }
+    case 'vcard':{
+      const name=v('f-v-name');if(!name)return null;
+      let c='BEGIN:VCARD\nVERSION:3.0\nFN:'+name.replace(/\n/g,' ')+'\n';
+      if(v('f-v-tel'))c+='TEL:'+v('f-v-tel')+'\n';
+      if(v('f-v-email'))c+='EMAIL:'+v('f-v-email')+'\n';
+      if(v('f-v-org'))c+='ORG:'+v('f-v-org')+'\n';
+      if(v('f-v-title'))c+='TITLE:'+v('f-v-title')+'\n';
+      if(v('f-v-url'))c+='URL:'+v('f-v-url')+'\n';
+      return c+'END:VCARD';
+    }
+    case 'email':{
+      const to=v('f-e-to');if(!to)return null;
+      const q=[];
+      if(v('f-e-sub'))q.push('subject='+encodeURIComponent(v('f-e-sub')));
+      if(v('f-e-body'))q.push('body='+encodeURIComponent(v('f-e-body')));
+      return 'mailto:'+to+(q.length?'?'+q.join('&'):'');
+    }
+    case 'tel':return v('f-tel')?'tel:'+v('f-tel'):null;
+    case 'sms':return v('f-sms-tel')?'SMSTO:'+v('f-sms-tel')+':'+v('f-sms-body'):null;
+  }
+  return null;
+}
+function readOpt(){
+  return {
+    c1:$('o-c1').value, c2:$('o-c2').value, grad:$('o-grad').checked,
+    gradDir:$('o-gradDir').value, bg:$('o-bg').value, transparent:$('o-transp').checked,
+    dot:$('o-dot').value, eye:$('o-eye').value, ecl:$('o-ecl').value,
+    margin:+$('o-margin').value,
+    logoSrc:state.logoSrc, logoImg:state.logoImg,
+    logoScale:+$('o-logoScale').value, logoPad:$('o-logoPad').checked,
+  };
+}
+function saveSettings(){
+  const d={};
+  document.querySelectorAll('[data-persist]').forEach(el=>d[el.id]=
+    el.type==='checkbox'?el.checked:el.value);
+  d.__type=state.type;
+  try{localStorage.setItem('tomato-qr',JSON.stringify(d));}catch(e){}
+}
+function loadSettings(){
+  try{
+    const d=JSON.parse(localStorage.getItem('tomato-qr'));
+    if(!d)return;
+    document.querySelectorAll('[data-persist]').forEach(el=>{
+      if(el.id in d){ if(el.type==='checkbox')el.checked=d[el.id]; else el.value=d[el.id]; }
+    });
+    if(d.__type)setType(d.__type);
+  }catch(e){}
+}
+function regen(){
+  const opt=readOpt(); state.opt=opt;
+  $('v-margin').textContent=opt.margin+' 模块';
+  $('v-logoScale').textContent=opt.logoScale+'%';
+  $('o-c2').style.display=opt.grad?'':'none';
+  $('o-gradDir').style.display=opt.grad?'':'none';
+  $('o-bg').style.display=opt.transparent?'none':'';
+  const content=buildContent();
+  if(!content){
+    state.qr=null;
+    $('ph').classList.remove('off');
+    $('stats').textContent='等待输入…';
+    saveSettings();return;
+  }
+  try{
+    state.qr=qrGenerate(content,opt.ecl);
+    renderTo($('cv'),state.qr,opt,640);
+    $('ph').classList.add('off');
+    const bytes=new TextEncoder().encode(content).length;
+    $('stats').textContent=`字节 ${bytes} · 版本 ${state.qr.ver} (${state.qr.size}×${state.qr.size}) · 容错 ${opt.ecl} · 掩码 ${state.qr.mask}`;
+  }catch(err){
+    state.qr=null;
+    $('ph').textContent=err.message;
+    $('ph').classList.remove('off');
+    $('stats').textContent=err.message;
+  }
+  saveSettings();
+}
+function scheduleRegen(){
+  clearTimeout(regenTimer);
+  regenTimer=setTimeout(regen,120);
+}
+function setType(t){
+  state.type=t;
+  document.querySelectorAll('#typeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.type===t));
+  document.querySelectorAll('.fields').forEach(f=>f.classList.toggle('on',f.dataset.type===t));
+}
+
+/* —— 事件绑定 —— */
+$('typeSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  setType(b.dataset.type);regen();
+});
+document.querySelectorAll('input,select,textarea').forEach(el=>{
+  el.addEventListener('input',scheduleRegen);
+  el.addEventListener('change',scheduleRegen);
+});
+const PRESETS={
+  classic:{c1:'#1a1a1a',c2:'#555555',grad:false,gradDir:'d',bg:'#ffffff',dot:'square',eye:'square'},
+  tomato:{c1:'#8f2a1c',c2:'#d05a3a',grad:true,gradDir:'d',bg:'#fffdf9',dot:'rounded',eye:'rounded'},
+  forest:{c1:'#14532d',c2:'#0d9488',grad:true,gradDir:'d',bg:'#ffffff',dot:'dot',eye:'circle'},
+  ocean:{c1:'#1e3a8a',c2:'#0ea5e9',grad:true,gradDir:'d',bg:'#ffffff',dot:'rounded',eye:'dot'},
+};
+document.querySelectorAll('.preset').forEach(b=>b.addEventListener('click',()=>{
+  const p=PRESETS[b.dataset.p];
+  $('o-c1').value=p.c1;$('o-c2').value=p.c2;
+  $('o-grad').checked=p.grad;$('o-gradDir').value=p.gradDir;
+  $('o-bg').value=p.bg;$('o-dot').value=p.dot;$('o-eye').value=p.eye;
+  regen();toast('已应用配色预设');
+}));
+$('logoDrop').addEventListener('click',()=>$('logoFile').click());
+$('logoFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    state.logoSrc=r.result;
+    const img=new Image();
+    img.onload=()=>{
+      state.logoImg=img;
+      $('logoImgEl').src=r.result;
+      $('logoPrev').style.display='flex';
+      if($('o-ecl').value!=='H'){$('o-ecl').value='H';toast('已自动切换为 H 级容错，保证扫码率');}
+      regen();
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);
+});
+$('logoClear').addEventListener('click',()=>{
+  state.logoSrc=state.logoImg=null;
+  $('logoPrev').style.display='none';$('logoFile').value='';
+  regen();
+});
+
+/* —— 导出 —— */
+function download(blob,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+$('dlPng').addEventListener('click',()=>{
+  if(!state.qr){toast('请先填写内容生成二维码');return;}
+  const c=document.createElement('canvas');
+  renderTo(c,state.qr,state.opt,+$('o-export').value);
+  c.toBlob(b=>download(b,'Xtn二维码.png'),'image/png');
+});
+$('dlSvg').addEventListener('click',()=>{
+  if(!state.qr){toast('请先填写内容生成二维码');return;}
+  download(new Blob([buildSVG(state.qr,state.opt)],{type:'image/svg+xml'}),'Xtn二维码.svg');
+});
+$('copyImg').addEventListener('click',()=>{
+  if(!state.qr){toast('请先填写内容生成二维码');return;}
+  try{
+    const c=document.createElement('canvas');
+    renderTo(c,state.qr,state.opt,1024);
+    c.toBlob(async b=>{
+      try{
+        await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);
+        toast('已复制到剪贴板');
+      }catch(e){toast('当前浏览器不支持复制图片，请使用下载');}
+    });
+  }catch(e){toast('复制失败，请使用下载功能');}
+});
+
+/* —— 初始化 —— */
+loadSettings();
+regen();
+</script>
+</body>
+</html>
