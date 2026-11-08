@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xtn 导航 - 常用服务与站点快速跳转</title>
+    <link rel="icon" href="../static/img/favicon.ico">
+    <meta name="description" content="Xtn 自用导航：本站服务与常用站点快速跳转，所有条目由 config.json 配置驱动。">
+    <meta name="keywords" content="xtn,导航,nav,快速跳转,常用站点,书签">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Xtn 导航 - 常用服务与站点快速跳转">
+    <meta property="og:description" content="Xtn 自用导航：本站服务与常用站点快速跳转。">
+
+    <link rel="stylesheet" href="../static/css/style.css">
+    <style>
+        /* ==================================================================
+           导航卡片（仅本页补充，基础风格沿用 ../static/css/style.css）
+           ================================================================== */
+        .navgrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .navcard {
+            background: #fff;
+            border: 1px solid #e2e4e8;
+            border-top: 3px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+
+        .navcard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, .08);
+        }
+
+        .navcard-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 14px 10px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .navcard-icon {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            border: 1px solid #e2e4e8;
+            background: #fafbfc;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-color);
+            font-family: Georgia, "Microsoft YaHei", serif;
+        }
+
+        .navcard-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .navcard-text {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navcard-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #33373d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .navcard:hover .navcard-name {
+            color: var(--accent-color);
+        }
+
+        .navcard-desc {
+            font-size: 13px;
+            color: #888;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .navcard-go {
+            font-size: 13px;
+            color: var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        /* 双按钮跳转：本站 / 官网 等文本按钮组 */
+        .navcard-actions {
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px;
+            border-top: 1px dashed #e4e6ea;
+        }
+
+        .navcard-actions a {
+            flex: 1;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 13px;
+            line-height: 1;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: background .15s, color .15s;
+        }
+
+        .navcard-actions a:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        /* 卡片底部信息条：类型标签 + 源码 / 作者 / 许可证 / 收录日期 */
+        .navcard-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            padding: 8px 14px;
+            border-top: 1px dashed #e4e6ea;
+            font-size: 12px;
+            color: #999;
+            background: #fafbfc;
+        }
+
+        .navtag {
+            display: inline-block;
+            padding: 1px 8px;
+            font-size: 12px;
+            line-height: 18px;
+            color: var(--accent-color);
+            background: rgba(200, 22, 29, .07);
+            border: 1px solid currentColor;
+            border-radius: 2px;
+        }
+
+        .navcard-meta a {
+            color: var(--accent-color);
+        }
+
+        .navcard-meta a:hover {
+            text-decoration: underline;
+        }
+
+        .navcard-meta .meta-external::after {
+            content: ' ↗';
+            font-size: 11px;
+        }
+
+        /* 搜索计数 */
+        .nav-search-stat {
+            font-size: 13px;
+            color: #888;
+            margin: 0 0 14px;
+        }
+
+        .nav-search-stat b {
+            color: var(--accent-color);
+        }
+
+        /* 加载失败提示（复用 notice-box 底色） */
+        .nav-error {
+            margin-bottom: 14px;
+        }
+
+        @media (max-width: 640px) {
+            .navgrid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-emblem">
+                <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true">
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="3"/>
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                    <path d="M50 18 L58.8 38.2 L80.9 38.2 L63 51.6 L69.8 71.8 L50 58.4 L30.2 71.8 L37 51.6 L19.1 38.2 L41.2 38.2 Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="loading-text">页面加载中</div>
+            <div class="loading-bar">
+                <div class="loading-bar-inner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 顶部工具条 -->
+    <div class="utilbar">
+        <div class="wrap utilbar-inner">
+            <span class="utilbar-greeting">您好，欢迎访问 Xtn 导航</span>
+            <div class="utilbar-links">
+                <a href="../index.html">返回主页</a>
+                <span class="sep">|</span>
+                <a href="https://github.com/xtnu" target="_blank">GitHub</a>
+                <span class="sep">|</span>
+                <a href="mailto:xtn@vip.qq.com?subject=纠错反馈">纠错反馈</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 站点头部 -->
+    <header class="site-header">
+        <div class="wrap site-header-inner">
+            <a href="../index.html" class="brand">
+                <span class="brand-emblem">
+                    <svg viewBox="0 0 100 100" width="54" height="54" aria-hidden="true">
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="3"/>
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.45"/>
+                        <path d="M50 18 L58.8 38.2 L80.9 38.2 L63 51.6 L69.8 71.8 L50 58.4 L30.2 71.8 L37 51.6 L19.1 38.2 L41.2 38.2 Z" fill="currentColor"/>
+                    </svg>
+                </span>
+                <span class="brand-text">
+                    <span class="brand-name" id="brandName">Xtn 导航</span>
+                    <span class="brand-sub" id="brandSub">常用服务与站点快速跳转</span>
+                </span>
+            </a>
+            <div class="site-search" id="siteSearch">
+                <div class="site-search-box">
+                    <input type="text" class="site-search-input" id="searchInput"
+                           placeholder="搜索导航条目，回车直达" autocomplete="off" aria-label="搜索导航条目">
+                    <button type="button" class="site-search-btn" id="searchBtn">搜索</button>
+                </div>
+                <div class="search-panel" id="searchPanel" role="listbox"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主导航（分组由 config.json 动态渲染） -->
+    <nav class="mainnav">
+        <div class="wrap">
+            <ul class="mainnav-list" id="mainnavList"></ul>
+        </div>
+    </nav>
+
+    <!-- 面包屑 -->
+    <div class="crumb">
+        <div class="wrap crumb-inner">
+            <span class="crumb-path">
+                当前位置：<a href="../index.html">首页</a> &gt; <span class="crumb-current">导航</span>
+            </span>
+            <span class="crumb-date" id="govDate">—</span>
+        </div>
+    </div>
+
+    <!-- 主体内容（由 config.json 渲染） -->
+    <main class="main wrap" id="navMain">
+        <div class="nav-error" id="navError" style="display:none">
+            <div class="notice-box">
+                配置文件 config.json 加载失败，导航内容无法显示。<br>
+                可能原因：① 直接双击用 file:// 方式打开本页（请通过 HTTP 服务访问）；② config.json 与本页面不在同一目录；③ config.json 格式有误（请用 JSON 校验工具检查）。
+            </div>
+        </div>
+        <p class="nav-search-stat" id="searchStat" style="display:none"></p>
+        <div id="navGroups"></div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="site-footer">
+        <div class="wrap">
+            <div class="footer-nav" id="footerNav">
+                <a href="../index.html">返回主页</a><span class="sep">|</span>
+                <a href="#nav">导航服务</a><span class="sep">|</span>
+                <a href="mailto:xtn@vip.qq.com">内容纠错</a>
+            </div>
+            <div class="footer-info">
+                <p>页面维护：夏透喃　|　内容编辑：Xtn　|　联系方式：<a href="mailto:xtn@vip.qq.com">xtn@vip.qq.com</a></p>
+                <p>
+                    <a href="https://icp.gov.moe/?keyword=20268999" target="_blank">萌ICP 备 20268999 号</a>
+                    <span class="sep">|</span>
+                    <a href="https://icp.gov.moe/?keyword=20256661" target="_blank">萌ICP 备 20256661 号</a>
+                    <span class="sep">|</span>
+                    <span>页面编号：XTN-2026-0002</span>
+                </p>
+                <p class="footer-tip">本站为个人导航页面，仅用于个人快速跳转与学习交流。</p>
+            </div>
+            <div class="footer-copyright" id="footerCopyright">Xtn © 2025　版权所有　|　本页面最后更新时间：<span id="footerUpdated">—</span></div>
+        </div>
+    </footer>
+
+    <div class="back-to-top" id="backToTop" title="返回顶部">
+        <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M512 384L256 640h512L512 384z" fill="currentColor"></path></svg>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // =====================================================
+            // 工具函数
+            // =====================================================
+            function esc(s) {
+                return String(s == null ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            }
+
+            // 外部链接：http/https/协议开头 → 新窗口；其余视为本站路径 → 当前页跳转
+            function isExternal(url) {
+                return /^(https?:)?\/\//i.test(String(url || ''));
+            }
+
+            // 跳转主目标：有 actions 取首个按钮，否则取 url
+            function primaryUrl(item) {
+                if (item.actions && item.actions.length && item.actions[0].url) return item.actions[0].url;
+                return item.url || '';
+            }
+
+            // 隐藏加载动画
+            var loadingScreen = document.getElementById('loadingScreen');
+            function hideLoading() {
+                if (!loadingScreen) return;
+                loadingScreen.classList.add('hidden');
+                setTimeout(function () { loadingScreen.style.display = 'none'; }, 600);
+            }
+
+            // =====================================================
+            // 渲染
+            // =====================================================
+            var groupsBox = document.getElementById('navGroups');
+
+            // 图标回退链：按顺序尝试 data-chain 中的地址，全部失败后移除 img 显示首字徽章
+            window.__iconChain = function (img) {
+                var arr = [];
+                try { arr = JSON.parse(img.getAttribute('data-chain') || '[]'); } catch (e) { arr = []; }
+                var idx = parseInt(img.getAttribute('data-idx') || '0', 10);
+                if (idx < arr.length) {
+                    img.setAttribute('data-idx', String(idx + 1));
+                    img.src = arr[idx];
+                } else {
+                    var p = img.parentNode;
+                    if (p) p.textContent = img.getAttribute('data-initial') || '?';
+                }
+            };
+
+            function renderIcon(item) {
+                var name = item.name || '?';
+                var initial = esc(name.charAt(0));
+                if (item.icon) {
+                    // 显式图标：加载失败时回退为首字徽章
+                    return '<span class="navcard-icon">' +
+                        '<img src="' + esc(item.icon) + '" alt="' + esc(name) + '" ' +
+                        'onerror="this.remove();this.parentNode.textContent=\'' + initial + '\'">' +
+                        '</span>';
+                }
+                // 无显式图标：外部链接自动探测站点 favicon，否则直接首字徽章
+                var url = primaryUrl(item);
+                if (isExternal(url)) {
+                    var host = '';
+                    try { host = new URL(url).hostname; } catch (e) { host = ''; }
+                    if (host) {
+                        var chain = [
+                            'https://' + host + '/favicon.ico',
+                            'https://favicon.im/' + host
+                        ];
+                        return '<span class="navcard-icon">' +
+                            '<img src="' + esc(chain[0]) + '" alt="' + esc(name) + '" ' +
+                            'data-initial="' + initial + '" data-chain="' + esc(JSON.stringify(chain)) + '" data-idx="1" ' +
+                            'onerror="__iconChain(this)">' +
+                            '</span>';
+                    }
+                }
+                return '<span class="navcard-icon">' + initial + '</span>';
+            }
+
+            function renderCard(item) {
+                var actions = (Array.isArray(item.actions) && item.actions.length) ? item.actions : null;
+                var primary = actions ? (actions[0].url || '#') : (item.url || '#');
+                var primaryExt = isExternal(primary);
+                var primaryHref = esc(primary);
+                var primaryTarget = primaryExt ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+                var meta = [];
+                if (item.type) meta.push('<span class="navtag">' + esc(item.type) + '</span>');
+                if (item.source) meta.push('<a href="' + esc(item.source) + '" target="_blank" rel="noopener noreferrer" class="meta-external">源码</a>');
+                if (item.author) meta.push('<span>' + esc(item.author) + '</span>');
+                if (item.license) meta.push('<span>' + esc(item.license) + '</span>');
+                if (item.added) meta.push('<span>' + esc(item.added) + '</span>');
+
+                var goText = primaryExt ? '访问 ↗' : '进入 &gt;';
+
+                // 双按钮跳转：文本缺省依次为「本站 / 官网」，也可自定义 text
+                var actionsHtml = '';
+                if (actions) {
+                    var btns = actions.map(function (a, i) {
+                        var aUrl = a.url || '#';
+                        var aExt = isExternal(aUrl);
+                        var aTarget = aExt ? ' target="_blank" rel="noopener noreferrer"' : '';
+                        var text = a.text || (i === 0 ? '本站' : (i === 1 ? '官网' : ('跳转 ' + (i + 1))));
+                        return '<a class="navcard-action" href="' + esc(aUrl) + '"' + aTarget + '>' + esc(text) + '</a>';
+                    }).join('');
+                    actionsHtml = '<div class="navcard-actions">' + btns + '</div>';
+                }
+
+                return '<div class="navcard" data-name="' + esc(item.name) + '" data-desc="' + esc(item.desc) + '" data-url="' + primaryHref + '" data-type="' + esc(item.type || '') + '">' +
+                    '<a class="navcard-main" href="' + primaryHref + '"' + primaryTarget + ' title="' + esc(item.desc) + '">' +
+                        renderIcon(item) +
+                        '<span class="navcard-text">' +
+                            '<span class="navcard-name">' + esc(item.name) + '</span>' +
+                            '<span class="navcard-desc">' + esc(item.desc) + '</span>' +
+                        '</span>' +
+                        '<span class="navcard-go">' + goText + '</span>' +
+                    '</a>' +
+                    actionsHtml +
+                    (meta.length ? '<div class="navcard-meta">' + meta.join('') + '</div>' : '') +
+                '</div>';
+            }
+
+            function renderGroup(group, index) {
+                var cards = (group.items || []).map(renderCard).join('');
+                var head = '<div class="panel-head">' +
+                        '<h2 class="panel-title" data-kw="' + esc(group.id) + '">' + esc(group.title) + '</h2>' +
+                    '</div>';
+                var desc = group.desc ? '<p style="font-size:13px;color:#888;margin:-6px 0 12px">' + esc(group.desc) + '</p>' : '';
+                return '<section class="panel" id="' + esc(group.id || ('group-' + index)) + '">' +
+                        head +
+                        '<div class="panel-body">' + desc +
+                            (cards ? '<div class="navgrid">' + cards + '</div>' : '<p class="newslist-date">该分组暂无条目，请在 config.json 中添加。</p>') +
+                        '</div>' +
+                    '</section>';
+            }
+
+            function renderNav(config) {
+                var site = config.site || {};
+                var groups = config.groups || [];
+
+                // 站点头部信息
+                if (site.brand) document.getElementById('brandName').textContent = site.brand;
+                if (site.subtitle) document.getElementById('brandSub').textContent = site.subtitle;
+                if (site.updated) document.getElementById('footerUpdated').textContent = site.updated;
+
+                // 主导航：返回首页 + 各分组锚点（分组变化时导航自动跟随）
+                var navHtml = '<li><a href="../index.html">返　回</a></li>';
+                groups.forEach(function (g, i) {
+                    var active = i === 0 ? ' class="active"' : '';
+                    navHtml += '<li><a href="#' + esc(g.id || ('group-' + i)) + '"' + active + '>' + esc(g.title) + '</a></li>';
+                });
+                document.getElementById('mainnavList').innerHTML = navHtml;
+
+                // 分组面板
+                groupsBox.innerHTML = groups.map(renderGroup).join('');
+            }
+
+            // =====================================================
+            // 搜索：输入过滤卡片 / 下拉列表 / 回车直达
+            // =====================================================
+            var searchInput = document.getElementById('searchInput');
+            var searchPanel = document.getElementById('searchPanel');
+            var searchStat = document.getElementById('searchStat');
+            var searchBtn = document.getElementById('searchBtn');
+
+            function matchCard(card, kw) {
+                return ['name', 'desc', 'url', 'type'].some(function (k) {
+                    return (card.getAttribute('data-' + k) || '').toLowerCase().indexOf(kw) !== -1;
+                });
+            }
+
+            function applyFilter(kw) {
+                kw = kw.trim().toLowerCase();
+                var cards = groupsBox.querySelectorAll('.navcard');
+                var visible = [];
+                cards.forEach(function (card) {
+                    var show = !kw || matchCard(card, kw);
+                    card.style.display = show ? '' : 'none';
+                    if (show) visible.push(card);
+                });
+                // 隐藏整组无匹配的面板
+                groupsBox.querySelectorAll('.panel').forEach(function (panel) {
+                    var cardsIn = panel.querySelectorAll('.navcard');
+                    var any = Array.prototype.some.call(cardsIn, function (c) {
+                        return c.style.display !== 'none';
+                    });
+                    panel.style.display = any ? '' : 'none';
+                });
+                // 计数
+                if (kw) {
+                    searchStat.style.display = '';
+                    searchStat.innerHTML = '关键字 <b>' + esc(kw) + '</b> 共匹配到 <b>' + visible.length + '</b> 个条目，回车打开第一个。';
+                } else {
+                    searchStat.style.display = 'none';
+                }
+                return visible;
+            }
+
+            function openCard(card) {
+                if (!card) return;
+                var url = card.getAttribute('data-url');
+                if (isExternal(url)) window.open(url, '_blank', 'noopener');
+                else location.href = url;
+            }
+
+            // 下拉条目：类型标签 + 标题（关键词高亮）+ 右侧说明小字
+            function hl(text, kw) {
+                text = esc(text);
+                kw = (kw || '').trim();
+                if (!kw) return text;
+                var safe = esc(kw).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return text.replace(new RegExp(safe, 'gi'), function (m) { return '<em>' + m + '</em>'; });
+            }
+
+            function renderPanel(visible, kw) {
+                var searchBox = document.getElementById('siteSearch');
+                if (!searchPanel || !searchBox) return;
+                if (!visible.length) {
+                    searchPanel.innerHTML = '<div class="search-empty">没有匹配的条目</div>';
+                } else {
+                    var html = visible.slice(0, 8).map(function (card) {
+                        var url = card.getAttribute('data-url');
+                        var ext = isExternal(url);
+                        var type = card.getAttribute('data-type') || (ext ? '导航' : '服务');
+                        return '<div class="search-item" role="option" data-url="' + esc(url) + '">' +
+                            '<span class="search-item-type">' + esc(type) + '</span>' +
+                            '<span class="search-item-title">' + hl(card.getAttribute('data-name'), kw) + '</span>' +
+                            '<span class="search-item-group">' + esc((card.getAttribute('data-desc') || url).slice(0, 20)) + '</span>' +
+                        '</div>';
+                    }).join('');
+                    searchPanel.innerHTML = html;
+
+                    searchPanel.querySelectorAll('.search-item').forEach(function (el) {
+                        el.addEventListener('click', function () {
+                            var url = el.getAttribute('data-url');
+                            if (isExternal(url)) window.open(url, '_blank', 'noopener');
+                            else location.href = url;
+                        });
+                    });
+                }
+                searchBox.classList.add('open');
+            }
+
+            searchInput.addEventListener('input', function () {
+                renderPanel(applyFilter(searchInput.value), searchInput.value);
+            });
+            searchInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    var visible = applyFilter(searchInput.value);
+                    if (visible.length) openCard(visible[0]);
+                }
+            });
+            searchBtn.addEventListener('click', function () {
+                renderPanel(applyFilter(searchInput.value), searchInput.value);
+            });
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('#siteSearch')) {
+                    var searchBox = document.getElementById('siteSearch');
+                    if (searchBox) searchBox.classList.remove('open');
+                }
+            });
+
+            // =====================================================
+            // 加载配置并渲染
+            // =====================================================
+            fetch('config.json', { cache: 'no-cache' })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(function (config) {
+                    renderNav(config);
+                    hideLoading();
+                })
+                .catch(function (err) {
+                    console.error('config.json 加载失败：', err);
+                    document.getElementById('navError').style.display = '';
+                    hideLoading();
+                });
+
+            // 顶部日期
+            var d = new Date();
+            var weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            document.getElementById('govDate').textContent =
+                d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日　' + weeks[d.getDay()];
+
+            // 返回顶部
+            var backToTop = document.getElementById('backToTop');
+            window.addEventListener('scroll', function () {
+                if (backToTop) backToTop.classList.toggle('visible', (window.pageYOffset || 0) > 300);
+            });
+            if (backToTop) backToTop.addEventListener('click', function () { window.scrollTo(0, 0); });
+        })();
+    </script>
+</body>
+</html>

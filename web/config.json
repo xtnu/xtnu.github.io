@@ -1,0 +1,103 @@
+{
+    "readme": "【配置说明】本文件是导航页唯一需要维护的文件，改这里即可，无需动 HTML。每个条目(item)字段：name=名称(必填)；desc=一句话说明(必填)；url=单跳转地址(以 http(s):// 开头=外部站点新窗口打开，否则=本站路径当前页跳转)；actions=可选双按钮跳转数组(每项 {text=按钮文字, url=跳转地址}，text 缺省依次为「本站/官网」，url 规则同 url 字段；配置 actions 后优先于 url，卡片主体点击默认跳转 actions[0])；icon=可选图标地址(相对本文件所在目录或完整 URL；缺省时若跳转目标是外部域名则自动探测站点 favicon，探测失败再回退名称首字徽章)；type=可选分类标签；source=可选源码链接；author=可选原作者；license=可选开源许可证；added=可选收录日期。name/desc 必填，url 与 actions 至少提供其一，其余字段均可省略。groups=分组(渲染顺序即页面顺序，分组下 title/desc/items 三项，items 可为空数组)。site=页面标题等站点信息。",
+
+    "site": {
+        "title": "Xtn 导航",
+        "subtitle": "WWW.521567.XYZ · 常用服务与站点快速跳转",
+        "brand": "Xtn 导航",
+        "updated": "2026-11-08"
+    },
+
+    "groups": [
+        {
+            "id": "services",
+            "title": "我的服务",
+            "desc": "托管在本站的工具与服务，点击进入",
+            "items": [
+                {
+                    "name": "准星助手",
+                    "desc": "游戏准星辅助工具",
+                    "url": "../app/crosshair/index.html",
+                    "icon": "../app/crosshair/icon.png",
+                    "type": "本站服务",
+                    "author": "Xtn",
+                    "added": "2026-11-08"
+                },
+                {
+                    "name": "免解锁Root工具",
+                    "desc": "免解锁 BL 一键刷 Root",
+                    "url": "../app/nounlockroot/index.html",
+                    "icon": "../app/nounlockroot/icon.jpg",
+                    "type": "本站服务",
+                    "author": "Xtn",
+                    "added": "2026-11-08"
+                },
+                {
+                    "name": "网站印章",
+                    "desc": "给你的网站添加一个印章",
+                    "url": "../seal/index.html",
+                    "type": "本站服务",
+                    "author": "Xtn",
+                    "added": "2026-11-08"
+                },
+                {
+                    "name": "图片加密",
+                    "desc": "加密保护图片隐私内容",
+                    "url": "./imagetool/index.html",
+                    "type": "本站服务",
+                    "author": "Xtn",
+                    "added": "2026-11-08"
+                },
+                {
+                    "name": "二维码生成",
+                    "desc": "网址文本 WiFi 一键生成",
+                    "url": "./qr/index.html",
+                    "type": "本站服务",
+                    "author": "Xtn",
+                    "added": "2026-11-08"
+                }
+            ]
+        },
+        {
+            "id": "nav",
+            "title": "导航服务",
+            "desc": "常用外部站点快速跳转，域名太长记不住的都收在这里",
+            "items": [
+                {
+                    "name": "GitHub",
+                    "desc": "代码托管与协作平台",
+                    "url": "https://github.com/",
+                    "type": "外部站点",
+                    "added": "2026-11-08"
+                },
+                {
+                    "name": "示例 · 双跳转",
+                    "desc": "演示「本站/官网」双按钮跳转，替换成你自己的即可",
+                    "actions": [
+                        { "url": "../seal/index.html" },
+                        { "url": "https://example.com/" }
+                    ],
+                    "type": "示例",
+                    "added": "2026-11-08"
+                },
+                {
+                    "name": "晴雨 · QINGYU",
+                    "desc": "友站：晴雨的个人主页",
+                    "url": "https://qyovo.top/",
+                    "type": "外部站点",
+                    "added": "2026-11-08"
+                },
+                {
+                    "name": "XXX 工具",
+                    "desc": "示例条目：源码归档型条目长这样，替换成你自己的即可",
+                    "url": "#",
+                    "type": "源码归档",
+                    "source": "https://github.com/...",
+                    "author": "原作者",
+                    "license": "MIT",
+                    "added": "2026-11-08"
+                }
+            ]
+        }
+    ]
+}
