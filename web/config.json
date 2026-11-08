@@ -69,10 +69,31 @@
                     "url": "https://github.com/",
                     "type": "外部站点",
                     "added": "2026-11-08"
-                },
+                }
+            ]
+        },
+        {
+            "id": "links",
+            "title": "友情链接",
+            "desc": "互访互链的友站",
+            "items": [
+                {
+                    "name": "晴雨 · QINGYU",
+                    "desc": "友站：晴雨的个人主页",
+                    "url": "https://qyovo.top/",
+                    "type": "友情链接",
+                    "added": "2026-11-08"
+                }
+            ]
+        },
+        {
+            "id": "examples",
+            "title": "示例内容",
+            "desc": "配置示例，替换成你自己的即可",
+            "items": [
                 {
                     "name": "示例 · 双跳转",
-                    "desc": "演示「本站/官网」双按钮跳转，替换成你自己的即可",
+                    "desc": "演示「本站/官网」双按钮跳转",
                     "actions": [
                         { "url": "../seal/index.html" },
                         { "url": "https://example.com/" }
@@ -81,15 +102,8 @@
                     "added": "2026-11-08"
                 },
                 {
-                    "name": "晴雨 · QINGYU",
-                    "desc": "友站：晴雨的个人主页",
-                    "url": "https://qyovo.top/",
-                    "type": "外部站点",
-                    "added": "2026-11-08"
-                },
-                {
                     "name": "XXX 工具",
-                    "desc": "示例条目：源码归档型条目长这样，替换成你自己的即可",
+                    "desc": "源码归档型条目长这样，替换成你自己的即可",
                     "url": "#",
                     "type": "源码归档",
                     "source": "https://github.com/...",

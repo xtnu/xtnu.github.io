@@ -29,6 +29,7 @@
             border-top: 3px solid var(--accent-color);
             display: flex;
             flex-direction: column;
+            min-width: 0;
             transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
         }
 
@@ -113,6 +114,7 @@
 
         .navcard-actions a {
             flex: 1;
+            min-width: 0;
             text-align: center;
             padding: 6px 0;
             font-size: 13px;
@@ -120,6 +122,9 @@
             border: 1px solid var(--accent-color);
             color: var(--accent-color);
             text-decoration: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             transition: background .15s, color .15s;
         }
 
@@ -154,6 +159,8 @@
 
         .navcard-meta a {
             color: var(--accent-color);
+            word-break: break-all;
+            overflow-wrap: anywhere;
         }
 
         .navcard-meta a:hover {
@@ -359,7 +366,7 @@
                 if (item.icon) {
                     // 显式图标：加载失败时回退为首字徽章
                     return '<span class="navcard-icon">' +
-                        '<img src="' + esc(item.icon) + '" alt="' + esc(name) + '" ' +
+                        '<img src="' + esc(item.icon) + '" alt="' + esc(name) + '" loading="lazy" ' +
                         'onerror="this.remove();this.parentNode.textContent=\'' + initial + '\'">' +
                         '</span>';
                 }
@@ -371,10 +378,10 @@
                     if (host) {
                         var chain = [
                             'https://' + host + '/favicon.ico',
-                            'https://favicon.im/' + host
+                            'https://a.favicon.im/' + host + '?throw-error-on-404=true'
                         ];
                         return '<span class="navcard-icon">' +
-                            '<img src="' + esc(chain[0]) + '" alt="' + esc(name) + '" ' +
+                            '<img src="' + esc(chain[0]) + '" alt="' + esc(name) + '" loading="lazy" ' +
                             'data-initial="' + initial + '" data-chain="' + esc(JSON.stringify(chain)) + '" data-idx="1" ' +
                             'onerror="__iconChain(this)">' +
                             '</span>';
