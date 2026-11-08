@@ -12,7 +12,7 @@
         {
             "id": "services",
             "title": "我的服务",
-            "desc": "托管在本站的工具与服务，点击进入",
+            "desc": "一些自用的工具与服务",
             "items": [
                 {
                     "name": "准星助手",
@@ -64,9 +64,12 @@
             "desc": "常用外部站点快速跳转，域名太长记不住的都收在这里",
             "items": [
                 {
-                    "name": "GitHub",
-                    "desc": "代码托管与协作平台",
-                    "url": "https://github.com/",
+                    "name": "搞机工具箱",
+                    "desc": "搞机工具箱网页版",
+                    "actions": [
+                        { "url": "../webadb/index.html" },
+                        { "url": "https://czjam.github.io/gjgjxweb/" }
+                    ],
                     "type": "外部站点",
                     "added": "2026-11-08"
                 }
@@ -89,11 +92,11 @@
         {
             "id": "examples",
             "title": "示例内容",
-            "desc": "配置示例，替换成你自己的即可",
+            "desc": "配置示例",
             "items": [
                 {
                     "name": "示例 · 双跳转",
-                    "desc": "演示「本站/官网」双按钮跳转",
+                    "desc": "双按钮跳转",
                     "actions": [
                         { "url": "../seal/index.html" },
                         { "url": "https://example.com/" }
@@ -103,7 +106,7 @@
                 },
                 {
                     "name": "XXX 工具",
-                    "desc": "源码归档型条目长这样，替换成你自己的即可",
+                    "desc": "源码归档型条目",
                     "url": "#",
                     "type": "源码归档",
                     "source": "https://github.com/...",
