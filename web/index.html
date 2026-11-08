@@ -373,12 +373,16 @@
                 // 无显式图标：外部链接自动探测站点 favicon，否则直接首字徽章
                 var url = primaryUrl(item);
                 if (isExternal(url)) {
-                    var host = '';
-                    try { host = new URL(url).hostname; } catch (e) { host = ''; }
-                    if (host) {
+                    var u = null;
+                    try { u = new URL(url); } catch (e) { u = null; }
+                    if (u && u.hostname) {
+                        // 图标探测链（依次尝试，失败自动回退到下一个）：
+                        // 1) 完整 URL：favicon.im 会抓取该页面并解析 <link rel="icon">，
+                        //    从而支持域名子路径/相对路径的图标（如 /path/assets/favicon.ico）；
+                        // 2) 域名根目录 /favicon.ico：作为快速且不依赖接口的兜底。
                         var chain = [
-                            'https://' + host + '/favicon.ico',
-                            'https://a.favicon.im/' + host + '?throw-error-on-404=true'
+                            'https://a.favicon.im/' + u.hostname + u.pathname + '?throw-error-on-404=true',
+                            'https://' + u.hostname + '/favicon.ico'
                         ];
                         return '<span class="navcard-icon">' +
                             '<img src="' + esc(chain[0]) + '" alt="' + esc(name) + '" loading="lazy" ' +

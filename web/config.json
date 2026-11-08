@@ -67,7 +67,7 @@
                     "name": "搞机工具箱",
                     "desc": "搞机工具箱网页版",
                     "actions": [
-                        { "url": "../webadb/index.html" },
+                        { "url": "../gjgjxweb/index.html" },
                         { "url": "https://czjam.github.io/gjgjxweb/" }
                     ],
                     "type": "外部站点",
