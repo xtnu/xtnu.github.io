@@ -41,6 +41,14 @@
                     "added": "2026-11-08"
                 },
                 {
+                    "name": "字符画工坊",
+                    "desc": "将图片或视频转化为多种字符画",
+                    "url": "./asciistudio/index.html",
+                    "type": "本站服务",
+                    "author": "Xtn",
+                    "added": "2026-11-08"
+                },
+                {
                     "name": "图片加密",
                     "desc": "加密保护图片隐私内容",
                     "url": "./imagetool/index.html",
