@@ -56,7 +56,7 @@ window.Config = {
   Navi: [
     { text: '首页', url: 'https://www.521567.xyz/' },
     { text: 'API', url: 'https://api.521567.xyz/' },
-    { text: 'GitHub', url: 'https://github.com/yb/uptime-status' },
+    { text: 'GitHub', url: 'https://github.com/xtnu/uptime-status' },
   ],
 
   // 功能开关（纯静态均可实现，按需关闭）
