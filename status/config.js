@@ -11,6 +11,7 @@ window.Config = {
   Groups: [
     { id: 'api',  name: 'API 接口' },
     { id: 'site', name: '站点服务' },
+    { id: 'xy', name: '星野' },
   ],
 
   // 是否按分组展示；false = 所有监控平铺在一起
@@ -26,6 +27,8 @@ window.Config = {
     { key: 'm803590185-35e20ec965337c7e34cd28da', group: 'api' },  // api-fast.521567.xyz
     { key: 'm801495724-0c9d3fd39d00472d69d8c139', group: 'api' },  // api.521567.xyz
     { key: 'm804732280-3c2eae569ed60567a16cb9e9', group: 'site' }, // www.521567.xyz
+    { key: 'm804744111-62484e8ad48f16838efd40c5', group: 'xy' }, // bmzj.oooz.top
+    { key: 'm804744114-9e3b1f550403b84eb7ba2d84', group: 'xy' }, // www.500766.xyz
   ],
 
   // 接口地址：每次请求都先走官方，任意异常（429/超时/无响应/返回错误）自动切到反代
